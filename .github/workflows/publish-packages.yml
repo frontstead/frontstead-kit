@@ -32,7 +32,7 @@ jobs:
       - name: Verify release artifacts
         run: npm run release:check
         env:
-          DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+          DATABASE_URL: postgresql://ci:ci@localhost:5432/frontstead_test
 
       - name: Publish tokens
         run: npm publish --workspace=@frontstead/tokens --access public --provenance
