@@ -1,0 +1,73 @@
+{
+  "name": "@frontstead/ui",
+  "version": "0.1.0",
+  "description": "Accessible React primitives for Frontstead applications.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": ["dist", "README.md"],
+  "sideEffects": false,
+  "exports": {
+    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js", "default": "./dist/index.js" },
+    "./button": { "types": "./dist/button.d.ts", "import": "./dist/button.js", "default": "./dist/button.js" },
+    "./card": { "types": "./dist/card.d.ts", "import": "./dist/card.js", "default": "./dist/card.js" },
+    "./badge": { "types": "./dist/badge.d.ts", "import": "./dist/badge.js", "default": "./dist/badge.js" },
+    "./dialog": { "types": "./dist/dialog.d.ts", "import": "./dist/dialog.js", "default": "./dist/dialog.js" },
+    "./input": { "types": "./dist/input.d.ts", "import": "./dist/input.js", "default": "./dist/input.js" },
+    "./label": { "types": "./dist/label.d.ts", "import": "./dist/label.js", "default": "./dist/label.js" },
+    "./skeleton": { "types": "./dist/skeleton.d.ts", "import": "./dist/skeleton.js", "default": "./dist/skeleton.js" },
+    "./empty": { "types": "./dist/empty.d.ts", "import": "./dist/empty.js", "default": "./dist/empty.js" },
+    "./alert": { "types": "./dist/alert.d.ts", "import": "./dist/alert.js", "default": "./dist/alert.js" },
+    "./select": { "types": "./dist/select.d.ts", "import": "./dist/select.js", "default": "./dist/select.js" },
+    "./native-select": { "types": "./dist/native-select.d.ts", "import": "./dist/native-select.js", "default": "./dist/native-select.js" },
+    "./separator": { "types": "./dist/separator.d.ts", "import": "./dist/separator.js", "default": "./dist/separator.js" },
+    "./avatar": { "types": "./dist/avatar.d.ts", "import": "./dist/avatar.js", "default": "./dist/avatar.js" },
+    "./textarea": { "types": "./dist/textarea.d.ts", "import": "./dist/textarea.js", "default": "./dist/textarea.js" },
+    "./checkbox": { "types": "./dist/checkbox.d.ts", "import": "./dist/checkbox.js", "default": "./dist/checkbox.js" },
+    "./spinner": { "types": "./dist/spinner.d.ts", "import": "./dist/spinner.js", "default": "./dist/spinner.js" },
+    "./form-message": { "types": "./dist/form-message.d.ts", "import": "./dist/form-message.js", "default": "./dist/form-message.js" },
+    "./tabs": { "types": "./dist/tabs.d.ts", "import": "./dist/tabs.js", "default": "./dist/tabs.js" },
+    "./tooltip": { "types": "./dist/tooltip.d.ts", "import": "./dist/tooltip.js", "default": "./dist/tooltip.js" },
+    "./popover": { "types": "./dist/popover.d.ts", "import": "./dist/popover.js", "default": "./dist/popover.js" },
+    "./toggle": { "types": "./dist/toggle.d.ts", "import": "./dist/toggle.js", "default": "./dist/toggle.js" },
+    "./toggle-group": { "types": "./dist/toggle-group.d.ts", "import": "./dist/toggle-group.js", "default": "./dist/toggle-group.js" },
+    "./scroll-area": { "types": "./dist/scroll-area.d.ts", "import": "./dist/scroll-area.js", "default": "./dist/scroll-area.js" },
+    "./table": { "types": "./dist/table.d.ts", "import": "./dist/table.js", "default": "./dist/table.js" },
+    "./sheet": { "types": "./dist/sheet.d.ts", "import": "./dist/sheet.js", "default": "./dist/sheet.js" },
+    "./alert-dialog": { "types": "./dist/alert-dialog.d.ts", "import": "./dist/alert-dialog.js", "default": "./dist/alert-dialog.js" },
+    "./dropdown-menu": { "types": "./dist/dropdown-menu.d.ts", "import": "./dist/dropdown-menu.js", "default": "./dist/dropdown-menu.js" }
+  },
+  "dependencies": {
+    "@frontstead/tokens": "^0.1.0",
+    "class-variance-authority": "^0.7.1",
+    "lucide-react": "^0.552.0",
+    "radix-ui": "^1.4.3"
+  },
+  "peerDependencies": {
+    "react": "^19",
+    "react-dom": "^19"
+  },
+  "engines": { "node": ">=20" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/frontstead/frontstead-kit.git",
+    "directory": "packages/ui"
+  },
+  "homepage": "https://github.com/frontstead/frontstead-kit#readme",
+  "bugs": "https://github.com/frontstead/frontstead-kit/issues",
+  "publishConfig": { "access": "public", "provenance": true },
+  "devDependencies": {
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
+  },
+  "scripts": {
+    "build": "tsup && node ../../scripts/copy-package-legal.mjs",
+    "pretest": "npm --prefix ../.. run build --workspace=@frontstead/tokens",
+    "test": "node --import tsx --test tests/*.test.tsx",
+    "typecheck": "tsc --project tsconfig.json --pretty false",
+    "prepack": "npm run test && npm run typecheck && npm run build"
+  }
+}

@@ -1,0 +1,44 @@
+name: Publish Packages
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: npm
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22.12'
+          cache: npm
+          registry-url: https://registry.npmjs.org
+
+      - name: Install trusted-publishing npm client
+        run: npm install --global npm@11.5.1
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify release artifacts
+        run: npm run release:check
+        env:
+          DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+
+      - name: Publish tokens
+        run: npm publish --workspace=@frontstead/tokens --access public --provenance
+
+      - name: Publish UI
+        run: npm publish --workspace=@frontstead/ui --access public --provenance
+
+      - name: Publish API client
+        run: npm publish --workspace=@frontstead/api-client --access public --provenance

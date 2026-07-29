@@ -1,0 +1,24 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./*"],
+      "@frontstead/api-client": ["../../packages/api-client/index.ts"],
+      "@frontstead/tokens": ["../../packages/tokens/index.ts"],
+      "@frontstead/tokens/*": ["../../packages/tokens/*"],
+      "@frontstead/ui": ["../../packages/ui/src/index.ts"],
+      "@frontstead/ui/*": ["../../packages/ui/src/*"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules", "scripts", ".next"]
+}

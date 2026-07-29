@@ -1,0 +1,89 @@
+name: Test + Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Cancel in-progress runs when a new commit lands on the same branch — saves
+# minutes and prevents stale CI feedback on rapid pushes.
+concurrency:
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-and-build:
+    name: Test, typecheck, build Next.js apps
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci -d ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+      # Some routes import jsonwebtoken at module load and read JWT_SECRET via
+      # a getter. A non-empty value at build time avoids warnings.
+      JWT_SECRET: ci-build-only-not-used-for-real-tokens
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22.12'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Generate Prisma client into packages/db/generated/ so the Next.js apps
+      # (which import types via the `db` workspace) can resolve them at build.
+      - name: Build db workspace (prisma generate)
+        run: npm run build --workspace=db
+
+      - name: Apply database migrations
+        run: npm run db:migrate
+
+      - name: Run api unit tests
+        run: npm run test:unit --workspace=api
+
+      - name: Run api integration tests
+        run: npm run test:integration --workspace=api
+
+      - name: Run MLS tests
+        run: npm run test --workspace=@frontstead/mls-service
+
+      - name: Test destructive seed guard
+        run: npm run test:seed-guard --workspace=db
+
+      - name: Run portal tests
+        run: npm run test --workspace=portal
+
+      - name: Typecheck all workspaces
+        run: npm run typecheck:ci
+
+      - name: Verify shared package artifacts
+        run: npm run build:packages && npm run verify:packages && npm run test:package-consumer
+
+      # Each `next build` runs the Webpack/SWC import-tracer that catches
+      # "server-only module imported into a client component" failures —
+      # the exact failure class that bit us in PR #168. tsc + vitest don't
+      # surface this; only the Next compiler does.
+      - name: Build portal
+        run: npm run build --workspace=portal
