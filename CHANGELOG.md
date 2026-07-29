@@ -20,6 +20,7 @@ All notable public changes to Frontstead Kit are documented here.
 - Theme radius values are validated before CSS generation.
 - Published tarballs reject source files, source maps, TypeScript build metadata, and unexpected files.
 - Spinner, Skeleton, Alert, Empty, Table, Sheet, and AlertDialog APIs received accessibility and composition hardening.
+- Patched PostCSS and Sharp releases override vulnerable versions bundled by Next.js.
 
 ## [0.11.0.0] - 2026-07-20
 
