@@ -1,6 +1,9 @@
 # Frontstead Kit Operations
 
-The default stack is `apps/portal` + `apps/api` + PostgreSQL. The owner inbox, areas, collections, private-app extraction, and Compose baseline are implemented; remaining transport work is tracked in the [Frontstead OSS Roadmap](./FRONTSTEAD_OSS_ROADMAP.md).
+The default stack is `apps/portal` + `apps/api` + PostgreSQL. Docker Compose is
+the portable baseline; service-by-service Railway deployment is also documented.
+Actionable future work is tracked in
+[GitHub Issues](https://github.com/frontstead/frontstead-kit/issues).
 
 ## Prerequisites
 
@@ -79,7 +82,10 @@ For the portable container baseline, see [Docker Compose](./COMPOSE.md). Service
 - [Docker Compose](./COMPOSE.md)
 - [Railway deployment](./DEPLOYMENT.md)
 - [MLS board setup](./MLS_BOARD_SETUP.md)
-- [Clean Core roadmap](./FRONTSTEAD_OSS_ROADMAP.md)
+- [MLS compliance framework](./MLS_COMPLIANCE.md)
+- [Classification and listing collections](./CLASSIFICATION.md)
+- [Shared package releases](./PACKAGE_RELEASES.md)
+- [Public roadmap](./ROADMAP.md)
 
 ## License
 

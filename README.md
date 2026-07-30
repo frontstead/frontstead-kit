@@ -12,7 +12,9 @@ Frontstead Kit is an Apache-2.0, self-hostable real estate portal stack. The cur
 - Agent API: disabled by default with `AGENT_API_ENABLED=false`.
 - Commercial frontends such as Agent HQ are distributed separately and consume the HTTP API.
 
-See the [Frontstead OSS Roadmap](./docs/FRONTSTEAD_OSS_ROADMAP.md) for completed boundaries and remaining transport work. Docker Compose is the canonical portable deployment baseline.
+Docker Compose is the canonical portable deployment baseline. Actionable future
+work is tracked in [GitHub Issues](https://github.com/frontstead/frontstead-kit/issues)
+and summarized in the [public roadmap](./docs/ROADMAP.md).
 
 ## Quick Start
 
@@ -90,7 +92,9 @@ See [MLS board setup](./docs/MLS_BOARD_SETUP.md) before enabling synchronization
 - [Docker Compose](./docs/COMPOSE.md)
 - [Shared package releases](./docs/PACKAGE_RELEASES.md)
 - [MLS board setup](./docs/MLS_BOARD_SETUP.md)
-- [Clean Core roadmap](./docs/FRONTSTEAD_OSS_ROADMAP.md)
+- [Classification and listing collections](./docs/CLASSIFICATION.md)
+- [Public roadmap](./docs/ROADMAP.md)
+- [MLS compliance framework](./docs/MLS_COMPLIANCE.md)
 
 ## License
 

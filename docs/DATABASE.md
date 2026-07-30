@@ -1,19 +1,12 @@
 # Database Operations
 
-## Current State
+Frontstead uses PostgreSQL in development and production. Prisma schema, migrations, client generation, and demo seeds live in `packages/db`.
 
-Frontstead uses PostgreSQL in development and production. Prisma schema, migrations, generated client configuration, and demo seeds live under `packages/db`.
+## Prerequisites
 
-```text
-packages/db/
-  prisma/schema.prisma
-  prisma/migrations/
-  prisma/seed*.ts
-  prisma.config.ts
-  scripts/seedGuard.ts
-```
-
-PostgreSQL is authoritative even when optional Redis or Typesense services are configured.
+- Node.js `>=22.12.0 <23`; the repository pins `22.12.0` in `.nvmrc` and `.node-version`.
+- npm with workspace support. No exact npm version is pinned; use the root `package-lock.json` with `npm ci` for reproducible installs. Do not use pnpm or yarn.
+- PostgreSQL. Redis and Typesense are optional and are not substitutes for PostgreSQL.
 
 ## Configure PostgreSQL
 
@@ -30,11 +23,19 @@ Use a dedicated local database and credentials. Never commit a real connection U
 From the repository root:
 
 ```bash
-npm run db:migrate              # prisma migrate deploy; applies existing migrations
-npm run build --workspace=db    # generate the Prisma client
+npm run db:migrate
+npm run build --workspace=db
 ```
 
-To author a migration, run Prisma from `packages/db` with its local config and schema. Review generated SQL, especially extension-backed indexes, before applying it. Do not use `npm run db:migrate` to author migrations.
+`db:migrate` runs `prisma migrate deploy` and applies committed migrations. It does not create a migration. API startup does not run this command, so run it explicitly before starting a newly deployed API version.
+
+To author a migration against a disposable development database:
+
+```bash
+npx prisma migrate dev --config=packages/db/prisma.config.ts --name <migration-name>
+```
+
+Review the generated SQL before committing it. Generate the Prisma client after schema changes with `npm run build --workspace=db`.
 
 Core search works on standard PostgreSQL without extensions. Operators with database-owner privileges can optionally apply `packages/db/scripts/enable-trigram-search.sql` to install `pg_trgm` and accelerate free-text search. Prisma does not represent those manually created indexes, so reject generated migrations that would drop them unintentionally.
 
@@ -66,7 +67,7 @@ npm run db:seed:portal
 npm run db:seed:demo-listings
 ```
 
-Renamed guarded reset commands:
+Guarded reset commands:
 
 ```bash
 npm run db:demo:reset
@@ -79,7 +80,14 @@ Reset commands replace or delete data. Confirm the parsed target shown by the gu
 
 ## Production
 
-Apply migrations as an explicit deploy or startup step. The current API start script runs `prisma migrate deploy`; demo seeds do not run automatically and must not be added to production startup.
+Apply migrations as an explicit deployment step before starting the API:
+
+```bash
+npm run db:migrate
+npm run start:api
+```
+
+Neither `npm run start:api` nor the API Docker image applies migrations. Demo seeds do not run automatically and must not be added to production startup.
 
 On Railway, the API typically receives an internal `DATABASE_URL` from the PostgreSQL service. That hostname only resolves inside Railway. For a workstation operation, temporarily supply the PostgreSQL service's public URL as `DATABASE_URL`, then run the migration command. Treat both URLs as secrets and avoid shell history, logs, and committed files.
 
@@ -113,4 +121,5 @@ npm run build --workspace=db
 npx prisma migrate status --config=packages/db/prisma.config.ts
 ```
 
-See [DEPLOYMENT.md](./DEPLOYMENT.md) for the current service-by-service deployment and [FRONTSTEAD_OSS_ROADMAP.md](./FRONTSTEAD_OSS_ROADMAP.md) for future portable deployment work.
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for service-by-service deployment and
+[COMPOSE.md](./COMPOSE.md) for the portable deployment baseline.
