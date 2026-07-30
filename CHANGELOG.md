@@ -2,6 +2,12 @@
 
 All notable public changes to Frontstead Kit are documented here.
 
+## [0.12.0.1] - 2026-07-30
+
+### Fixed
+- Portal listing results show their price, photo, listing link, and status again. Every card on a portal's property list was rendering those as blank while the address and room counts appeared normally.
+- `npm run db:migrate` and the demo seeds now read the `DATABASE_URL` from the `.env` file the Quick Start tells you to create at the repository root, instead of failing with "Cannot resolve environment variable: DATABASE_URL". An explicitly set `DATABASE_URL` still takes precedence.
+
 ## [0.12.0.0] - 2026-07-30
 
 ### Added
