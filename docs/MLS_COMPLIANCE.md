@@ -14,18 +14,21 @@ path for each enabled board.
 Compose and the checked-in worker environment example use these values. Direct
 process deployments must set and verify the effective values explicitly.
 
-## Current Safety Limitation
+## Enforcement Boundary
 
-`MLS_PUBLIC_DISPLAY_ENABLED` currently controls MLS worker media processing and
-search-index writes. It is not, by itself, an authorization filter for every
-PostgreSQL-backed API route, and changing it does not guarantee removal of
-documents indexed earlier.
+`MLS_PUBLIC_DISPLAY_ENABLED` must have the same effective value in the API and
+MLS worker. The API applies it to public PostgreSQL listing predicates,
+Typesense filters and scoped keys, property details, media, suggestions,
+collections, featured listings, and portal readiness. The worker applies it to
+media processing and property-document reconciliation.
 
-Until end-to-end API and search enforcement is verified, do not synchronize
-licensed MLS data into a database attached to a publicly reachable Portal or API.
-If a deployment previously enabled display, disable synchronization and public
-traffic, remove or reclassify affected search documents, and verify PostgreSQL and
-Typesense results before restoring traffic.
+Existing `Property.media` rows do not carry listing provenance. While MLS display
+is disabled, public responses suppress shared property media conservatively;
+eligible non-MLS `Listing.imageUrl` values remain available.
+
+Changing the environment flag does not rewrite documents already stored in
+Typesense. Run the exact property reindex after every policy transition or schema
+upgrade before restoring public traffic.
 
 ## Required Review
 
@@ -65,10 +68,12 @@ At minimum, verify:
 
 - `MLS_SYNC_ENABLED=false` stops new worker ingestion; it does not hide data
   already stored or indexed.
-- `MLS_PUBLIC_DISPLAY_ENABLED=false` stops worker media and indexing actions; it
-  is not a complete API read gate.
-- Disable public traffic as well as synchronization when approval, provider
-  behavior, or eligibility is uncertain.
+- `MLS_PUBLIC_DISPLAY_ENABLED=false` excludes MLS-sourced listings from API and
+  search results while preserving eligible non-MLS listings.
+- Run `POST /api/search/reindex/properties` after changing the flag so stale
+  Typesense documents are removed.
+- Disable public traffic during a policy transition until PostgreSQL and
+  Typesense verification passes.
 - Re-run the display verification suite after provider mapping or agreement
   changes.
 

@@ -42,6 +42,7 @@ JWT_EXPIRES_IN=7d
 FRONTEND_URL=https://portal.example.com
 ALLOWED_ORIGINS=https://portal.example.com
 AGENT_API_ENABLED=false
+MLS_PUBLIC_DISPLAY_ENABLED=false
 LOG_LEVEL=info
 ```
 
@@ -89,7 +90,7 @@ Build command: npm ci && npm run build --workspace=db
 Start command: npm run start --workspace=@frontstead/mls-service
 ```
 
-Set `DATABASE_URL` to the same PostgreSQL service used by the API. Configure provider credentials, matching `MLS_BOARD_ID`/`MLS_PREFIX`, storage, synchronization, and public-display gates according to [MLS_BOARD_SETUP.md](./MLS_BOARD_SETUP.md). Credentials belong only in the worker service environment. Without provider configuration, the worker can remain undeployed or idle.
+Set `DATABASE_URL` to the same PostgreSQL service used by the API. Configure provider credentials, matching `MLS_BOARD_ID`/`MLS_PREFIX`, storage, synchronization, and public-display gates according to [MLS_BOARD_SETUP.md](./MLS_BOARD_SETUP.md). Set `MLS_PUBLIC_DISPLAY_ENABLED` to the same value on the API and worker. Credentials belong only in the worker service environment. Without provider configuration, the worker can remain undeployed or idle.
 
 ## Optional Redis And Typesense
 
@@ -104,6 +105,10 @@ The baseline deployment is PostgreSQL-only.
   `TYPESENSE_HOST` is configured and skips it for PostgreSQL-only deployments.
 - Outside Railway, run `npm run typesense:migrate --workspace=api` before
   deploying code that depends on a changed Typesense schema.
+- After changing MLS public-display policy or deploying a Typesense visibility
+  schema change, run the authenticated
+  `POST /api/search/reindex/properties` endpoint. Reindex completes the exact
+  desired set and removes stale property documents.
 - Verify PostgreSQL fallback behavior before treating either optional service as a dependency.
 
 ## External Agent Clients
@@ -117,9 +122,11 @@ When deploying a compatible external Agent API client, set `AGENT_API_ENABLED=tr
 - [ ] PostgreSQL is attached and migrations complete successfully.
 - [ ] `JWT_SECRET` is unique and stored as a secret.
 - [ ] `AGENT_API_ENABLED=false` unless a compatible external Agent API client is intentionally deployed.
+- [ ] API and MLS worker use the same `MLS_PUBLIC_DISPLAY_ENABLED` value.
 - [ ] No demo seed command or `CONFIRM_DEMO_SEED` is configured in production.
 - [ ] `REDIS_ENABLED=false` and Typesense variables are omitted when those services are not deployed.
 - [ ] MLS credentials and public display are enabled only after board/compliance setup.
+- [ ] Typesense property reindex completed after the latest visibility-policy change.
 - [ ] API and portal health are verified after deployment.
 
 ## Workstation Access To Railway PostgreSQL

@@ -104,10 +104,9 @@ resolves to `verified` against your board's synced roster.
 
 ## 9. Before enabling public display
 
-Worker media and search-index processing are off by default
-(`MLS_PUBLIC_DISPLAY_ENABLED=false`). Work through the compliance checklist in
+MLS display is off by default (`MLS_PUBLIC_DISPLAY_ENABLED=false`). Set the same
+value on the API and worker. Work through the compliance checklist in
 [MLS_COMPLIANCE.md](./MLS_COMPLIANCE.md) before flipping it on. Keep board-specific
 agreements, legal review, and approval evidence outside the public repository.
-The setting is currently a worker control, not a complete PostgreSQL API read
-gate, so do not sync licensed data into a publicly reachable deployment until the
-end-to-end checks in that document pass.
+Run the authenticated property reindex and complete the end-to-end checks in that
+document before restoring public traffic.
