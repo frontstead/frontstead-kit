@@ -2,7 +2,9 @@
 
 ## Current State
 
-The first Clean Core transition uses one public portal frontend, one API, and one PostgreSQL database per deployment. PostgreSQL is the system of record and the only required data service.
+A Frontstead Kit deployment uses one public portal frontend, one API, and one
+PostgreSQL database. PostgreSQL is the system of record and the only required
+data service.
 
 ```text
 Browser
@@ -43,7 +45,7 @@ Anonymous portal calls use the portal's same-origin `/api` rewrite. Authenticate
 
 The API accesses PostgreSQL through Prisma. The portal's property search and API search fallback use PostgreSQL ILIKE/trigram behavior. If `TYPESENSE_HOST` is configured, selected search paths may use Typesense; failures fall back to PostgreSQL. Typesense does not replace PostgreSQL authority.
 
-The MLS worker is deployed and operated separately from request-serving processes. It writes normalized MLS data and sync state to the same PostgreSQL database. It can start without synchronization credentials and remain idle; public MLS display remains disabled until explicitly approved and configured.
+The MLS worker is deployed and operated separately from request-serving processes. It writes normalized MLS data and sync state to the same PostgreSQL database. It can start without synchronization credentials and remain idle. Do not sync licensed data into a publicly reachable deployment until board approval and every public read path have been verified; see [MLS_COMPLIANCE.md](./MLS_COMPLIANCE.md).
 
 ## Agent API Boundary
 
@@ -75,8 +77,12 @@ packages/
 - API: `DATABASE_URL`, `JWT_SECRET`, and portal origin settings belong in the API service environment.
 - `FRONTEND_URL` identifies the portal origin, not a legacy web runtime or slug route.
 - MLS worker: has its own service environment and shares only the database and intentionally matching MLS board identifiers with the API.
-- Optional Typesense and Redis variables should be omitted, not filled with dummy production values, when those services are absent.
+- Omit optional Typesense variables when it is absent. Set `REDIS_ENABLED=false`
+  when Redis is absent.
 
-## Roadmap Boundary
+## Change Boundary
 
-The owner inbox, areas, collections, repository extraction, and Docker Compose baseline are implemented. A later Next.js-native transport remains roadmap work. See [FRONTSTEAD_OSS_ROADMAP.md](./FRONTSTEAD_OSS_ROADMAP.md).
+This document describes implemented architecture. Proposed transport, service,
+or package changes belong in a scoped
+[GitHub Issue](https://github.com/frontstead/frontstead-kit/issues) until they
+ship. See [ROADMAP.md](./ROADMAP.md) for maintained public themes.

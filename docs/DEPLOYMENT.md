@@ -2,6 +2,11 @@
 
 This document describes service-by-service Railway deployment. For the canonical portable baseline, use [Docker Compose](./COMPOSE.md).
 
+## Runtime Requirements
+
+- Node.js `>=22.12.0 <23`; use `22.12.0` to match the repository and API Dockerfile.
+- npm workspaces and the root `package-lock.json`. No exact npm version is pinned; use `npm ci` in reproducible builds.
+
 ## Required Services
 
 | Service | Source | Required |
@@ -20,11 +25,11 @@ Commercial and client-specific frontends are maintained separately and are not r
 Create a service from the repository root.
 
 ```text
-Build command: npm install && npm run build:api
+Build command: npm ci && npm run build:api
 Start command: npm run start:api
 ```
 
-Do not use root `npm run build` for the API service; it builds every buildable workspace. The API start command applies existing Prisma migrations before starting.
+Do not use root `npm run build` for the API service; it builds every buildable workspace. The start command only starts the API and does not apply database migrations.
 
 Minimum variables:
 
@@ -47,7 +52,7 @@ Generate a unique `JWT_SECRET` in a secret manager or secure local shell. Do not
 Create a second service from the repository root.
 
 ```text
-Build command: npm install && npm run build --workspace=portal
+Build command: npm ci && npm run build --workspace=portal
 Start command: npm run start:portal
 ```
 
@@ -63,7 +68,15 @@ Point the public domain directly to the root of `apps/portal`. No legacy fronten
 
 ## PostgreSQL And Migrations
 
-Attach Railway PostgreSQL to the API and MLS worker. The API uses the internal service URL inside Railway. `npm run start:api` applies migrations; alternatively run `npm run db:migrate` as an explicit deployment step.
+Attach Railway PostgreSQL to the API and MLS worker. The API uses the internal service URL inside Railway.
+
+Run migrations as an explicit pre-deploy or release step, with the same `DATABASE_URL` that the API uses:
+
+```bash
+npm run db:migrate
+```
+
+The command runs `prisma migrate deploy`. It must complete before `npm run start:api`; API startup and the API Docker image do not apply migrations automatically.
 
 Do not auto-seed production. Demo seed commands are disabled under `NODE_ENV=production` and require `CONFIRM_DEMO_SEED` for an exact non-production database target. See [DATABASE.md](./DATABASE.md).
 
@@ -72,7 +85,7 @@ Do not auto-seed production. Demo seed commands are disabled under `NODE_ENV=pro
 Deploy the included worker from the repository root when MLS synchronization is needed.
 
 ```text
-Build command: npm install && npm run build --workspace=db
+Build command: npm ci && npm run build --workspace=db
 Start command: npm run start --workspace=@frontstead/mls-service
 ```
 
@@ -82,9 +95,15 @@ Set `DATABASE_URL` to the same PostgreSQL service used by the API. Configure pro
 
 The baseline deployment is PostgreSQL-only.
 
-- Leave `REDIS_URL` unset when Redis is absent.
+- Set `REDIS_ENABLED=false` when Redis is absent.
+- When Redis is enabled, configure `REDIS_HOST`, `REDIS_PORT`, and optional
+  `REDIS_PASSWORD` and `REDIS_DB` values.
 - Leave `TYPESENSE_HOST` and related variables unset when Typesense is absent.
 - If Typesense is enabled, configure its host, port, protocol, and API key on services that use it.
+- The Railway pre-deploy command runs the Typesense schema migration when
+  `TYPESENSE_HOST` is configured and skips it for PostgreSQL-only deployments.
+- Outside Railway, run `npm run typesense:migrate --workspace=api` before
+  deploying code that depends on a changed Typesense schema.
 - Verify PostgreSQL fallback behavior before treating either optional service as a dependency.
 
 ## External Agent Clients
@@ -97,9 +116,9 @@ When deploying a compatible external Agent API client, set `AGENT_API_ENABLED=tr
 - [ ] API and portal use HTTPS URLs and matching CORS origins.
 - [ ] PostgreSQL is attached and migrations complete successfully.
 - [ ] `JWT_SECRET` is unique and stored as a secret.
-- [ ] `AGENT_API_ENABLED=false` unless Agent HQ is intentionally deployed.
+- [ ] `AGENT_API_ENABLED=false` unless a compatible external Agent API client is intentionally deployed.
 - [ ] No demo seed command or `CONFIRM_DEMO_SEED` is configured in production.
-- [ ] Redis and Typesense variables are omitted when those services are not deployed.
+- [ ] `REDIS_ENABLED=false` and Typesense variables are omitted when those services are not deployed.
 - [ ] MLS credentials and public display are enabled only after board/compliance setup.
 - [ ] API and portal health are verified after deployment.
 
