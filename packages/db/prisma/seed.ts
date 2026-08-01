@@ -946,7 +946,6 @@ async function main() {
       const account = await tx.account.create({
         data: {
           name: `${userData.firstName} ${userData.lastName}`,
-          plan: 'free',
         },
       });
       const created = await tx.user.create({
