@@ -1,4 +1,4 @@
-import 'dotenv/config';
+import '../scripts/loadEnv.js';
 import { prisma } from '../index.js';
 import bcrypt from 'bcrypt';
 import { requireDemoSeedOptIn } from '../scripts/seedGuard.js';
