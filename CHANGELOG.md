@@ -6,6 +6,7 @@ All notable public changes to Frontstead Kit are documented here.
 
 ### Fixed
 - The demo seeds and the database backfill scripts now read `DATABASE_URL` from the `.env` file the Quick Start tells you to create at the repository root. They previously looked for a `.env` beside themselves in `packages/db`, so following the Quick Start produced "DATABASE_URL is required before running a demo seed". An explicitly set `DATABASE_URL` still takes precedence.
+- The demo seeds run again. Every seed entrypoint failed against the current schema: `db:demo:reset` and `db:seed:1000` set an `Account.plan` field that no longer exists, `db:seed:1000` created `Segment` and `PortalSegment` records for models that classification replaced, and `db:demo:reset:agent` called a segment helper that was deleted in the same change. Segment seeding is now expressed as portal listing collections.
 
 ### Changed
 - Corrected the 0.12.0.1 entry below, which claimed the demo seeds were covered by that release's environment fix. Only `npm run db:migrate` was fixed at the time; the seeds are fixed in this release.
