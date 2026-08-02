@@ -31,6 +31,12 @@ Start command: npm run start:api
 
 Do not use root `npm run build` for the API service; it builds every buildable workspace. The start command only starts the API and does not apply database migrations.
 
+Unlike the portal, the API builds with Railpack rather than its Dockerfile.
+`prisma generate` reads `DATABASE_URL` through `packages/db/prisma.config.ts`,
+and Railpack has the service variables in scope at build time while a Docker
+build does not, so `apps/api/Dockerfile` currently fails at that step. Use it
+only with `DATABASE_URL` supplied as a build argument.
+
 Minimum variables:
 
 ```bash
@@ -50,12 +56,22 @@ Generate a unique `JWT_SECRET` in a secret manager or secure local shell. Do not
 
 ## Portal Service
 
-Create a second service from the repository root.
+Create a second service from the repository root. It builds from
+`apps/portal/Dockerfile`, which `apps/portal/railway.json` selects:
 
 ```text
-Build command: npm ci && npm run build --workspace=portal
-Start command: npm run start:portal
+Builder:         Dockerfile
+Dockerfile path: apps/portal/Dockerfile
+Root directory:  /            (the image builds from the monorepo root)
 ```
+
+Leave the start command empty. The image already runs the standalone server with
+`HOSTNAME=0.0.0.0` and `PORT=3006`. Setting a Railway start command overrides the
+image's `CMD` and routes startup through `npm run start`, which binds the
+container hostname instead of all interfaces — the service then returns `502`
+while its logs still report `✓ Ready`.
+
+Point the service's public domain at target port `3006`.
 
 Variables:
 
@@ -64,6 +80,13 @@ NODE_ENV=production
 NEXT_PUBLIC_API_URL=https://api.example.com
 NEXT_PUBLIC_SITE_NAME="Example Realty"
 ```
+
+`NEXT_PUBLIC_*` values are compiled into the bundle, so changing one rebuilds the
+image rather than restarting it. `apps/portal/Dockerfile` declares
+`ARG NEXT_PUBLIC_API_URL`, so Railway passes the service variable through at
+build time; its `http://api:3001` default only applies to a local
+`docker build` with no argument (and to Docker Compose, where that hostname
+resolves).
 
 Point the public domain directly to the root of `apps/portal`. No legacy frontend or marketing service is required.
 
