@@ -90,3 +90,51 @@ jobs:
       # surface this; only the Next compiler does.
       - name: Build portal
         run: npm run build --workspace=portal
+
+  # The job above proves the code compiles; it says nothing about whether the
+  # stack a self-hoster actually runs still starts. compose.yaml is documented
+  # as the canonical portable baseline, but nothing exercised it, so it broke
+  # unnoticed: apps/api/Dockerfile stopped building (prisma generate could not
+  # resolve DATABASE_URL) and it backs both the migrate and api services here.
+  #
+  # This boots the default profile — postgres, migrate, api, portal — from a
+  # clean machine and probes the two public entrypoints. It is the check that
+  # keeps "portable" an assertion rather than a claim, and it covers the
+  # container-only failures the unit suite cannot see: image builds, migrations
+  # applying against a real database, and servers binding an address the host
+  # can actually reach.
+  compose-smoke:
+    name: Docker Compose stack boots
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      # --wait blocks on the healthchecks compose.yaml already declares, so a
+      # container that starts but never becomes reachable fails here rather
+      # than passing as "up". migrate must run to completion before api starts.
+      - name: Start the stack
+        env:
+          JWT_SECRET: ci-compose-smoke-not-a-real-secret
+          POSTGRES_PASSWORD: ci-compose-smoke
+        run: docker compose up --build --detach --wait --wait-timeout 900
+
+      - name: API answers /health
+        run: |
+          curl --fail --silent --show-error --max-time 30 http://localhost:3001/health \
+            | tee /dev/stderr | grep -q '"status":"healthy"'
+
+      - name: Portal serves its root
+        run: curl --fail --silent --show-error --max-time 30 -o /dev/null http://localhost:3006/
+
+      # Without this, a red run says only that a healthcheck timed out. The
+      # cause is almost always in a container log.
+      - name: Dump container logs on failure
+        if: failure()
+        run: docker compose logs --no-color --timestamps
+
+      - name: Tear down
+        if: always()
+        run: docker compose down --volumes --remove-orphans
