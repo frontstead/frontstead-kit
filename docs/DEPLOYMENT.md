@@ -65,13 +65,35 @@ Dockerfile path: apps/portal/Dockerfile
 Root directory:  /            (the image builds from the monorepo root)
 ```
 
-Leave the start command empty. The image already runs the standalone server with
-`HOSTNAME=0.0.0.0` and `PORT=3006`. Setting a Railway start command overrides the
-image's `CMD` and routes startup through `npm run start`, which binds the
-container hostname instead of all interfaces — the service then returns `502`
-while its logs still report `✓ Ready`.
+Leave the start command empty, and clear any command an existing service already
+has. The image runs the standalone server itself, binding `HOSTNAME=0.0.0.0` so
+the platform can reach it.
 
-Point the service's public domain at target port `3006`.
+A Railway start command overrides the image's `CMD`. Routing startup back through
+`npm run start` binds the container hostname rather than all interfaces, and the
+service returns `502` while its logs still report `✓ Ready`. A stale command left
+from an earlier setup fails the same way — or crashes the container outright if it
+names a script this repository no longer has. Check the build command too;
+switching builders does not clear either one.
+
+Point the service's public domain at the port the container actually binds, which
+is not necessarily the `3006` the image declares. Railway injects its own `PORT`
+into the running container, and a runtime variable overrides the image's `ENV`,
+so the server follows the injected value — `8080` by default. The startup log
+line reports the truth:
+
+```text
+▲ Next.js
+- Network:  http://0.0.0.0:8080     <- set the domain's target port to this
+```
+
+Honouring an injected `PORT` is the behaviour every managed platform expects, so
+prefer matching the domain to it over forcing the port back to `3006` with a
+service variable. `3006` applies where nothing injects a port — Docker Compose,
+and a plain `docker run`.
+
+A target port that does not match the bound port returns `502` while the
+deployment reports success and the container logs `✓ Ready`.
 
 Variables:
 
