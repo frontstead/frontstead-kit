@@ -2,6 +2,11 @@
 
 All notable public changes to Frontstead Kit are documented here.
 
+## [0.12.0.4] - 2026-08-20
+
+### Added
+- `@frontstead/ui` now includes a brand-neutral `SortableTableHead` with native keyboard activation, explicit ascending/descending/unsorted semantics, and consumer-controlled sorting state.
+
 ## [0.12.0.3] - 2026-08-20
 
 ### Changed
