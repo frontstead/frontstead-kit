@@ -2,6 +2,11 @@
 
 All notable public changes to Frontstead Kit are documented here.
 
+## [0.12.0.3] - 2026-08-20
+
+### Changed
+- `@frontstead/ui` now depends only on the Radix primitives its exported components use, instead of the aggregate `radix-ui` package. The package dependency contract is checked against source imports and verified through a fresh tarball consumer.
+
 ## [0.12.0.2] - 2026-08-01
 
 ### Fixed
