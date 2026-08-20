@@ -1,10 +1,11 @@
-// @frontstead/ui — shadcn-style primitives. Radix is the single dependency
-// chokepoint: apps import these components, never `radix-ui` directly. Note the
-// public prop types currently mirror Radix (`ComponentProps<typeof XPrimitive>`),
-// so a future swap to Base UI is a contained per-component edit here, not a
-// zero-touch change for call sites that pass Radix-specific props.
+// @frontstead/ui — shadcn-style primitives. Third-party behavior stays behind
+// these exports instead of leaking direct imports into applications. Some public
+// prop types intentionally mirror their underlying primitive, so swapping a
+// dependency remains a contained per-component edit rather than a zero-touch
+// change for call sites that use dependency-specific props.
 export * from "./button";
 export * from "./card";
+export * from "./calendar";
 export * from "./badge";
 export * from "./dialog";
 export * from "./input";

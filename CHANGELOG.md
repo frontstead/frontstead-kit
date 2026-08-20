@@ -2,6 +2,11 @@
 
 All notable public changes to Frontstead Kit are documented here.
 
+## [0.12.0.5] - 2026-08-20
+
+### Added
+- `@frontstead/ui` now includes an accessible, brand-neutral `Calendar` primitive with consumer-controlled locale, week start, date boundaries, disabled dates, selection mode, and callbacks.
+
 ## [0.12.0.4] - 2026-08-20
 
 ### Added
