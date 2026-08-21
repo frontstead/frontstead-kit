@@ -47,21 +47,25 @@ import assert from "node:assert/strict";
 import { resolvePublicApiBaseUrl } from "@frontstead/api-client";
 import { compileThemeCss } from "@frontstead/tokens/theme";
 import { Button, NativeSelect, Popover } from "@frontstead/ui";
+import { Calendar } from "@frontstead/ui/calendar";
 import { SortableTableHead } from "@frontstead/ui/table";
 assert.equal(resolvePublicApiBaseUrl({ NEXT_PUBLIC_API_URL: "https://api.example.com/" }), "https://api.example.com");
 assert.match(compileThemeCss({ palette: { primary: "#065f46" } }), /--primary:/);
 assert.equal(typeof Button, "function");
 assert.equal(typeof NativeSelect, "function");
 assert.equal(typeof Popover, "function");
+assert.equal(typeof Calendar, "function");
 assert.equal(typeof SortableTableHead, "function");
 assert.match(import.meta.resolve("@frontstead/tokens/preset.css"), /preset\\.css$/);
 `);
 
   await writeFile(join(directory, "consumer.tsx"), `
 import { Button, NativeSelect } from "@frontstead/ui";
+import { Calendar } from "@frontstead/ui/calendar";
 import { SortableTableHead } from "@frontstead/ui/table";
 export const form = <form><NativeSelect name="status"><option value="active">Active</option></NativeSelect><Button type="submit" loading={false}>Save</Button></form>;
 export const heading = <SortableTableHead sortDirection="ascending" onSort={() => {}}>Price</SortableTableHead>;
+export const calendar = <Calendar mode="single" weekStartsOn={1} />;
 `);
   await writeFile(join(directory, "tsconfig.json"), JSON.stringify({
     compilerOptions: {
