@@ -46,8 +46,9 @@ try {
 import assert from "node:assert/strict";
 import { resolvePublicApiBaseUrl } from "@frontstead/api-client";
 import { compileThemeCss } from "@frontstead/tokens/theme";
-import { Button, DateTimePicker, NativeSelect, Popover } from "@frontstead/ui";
+import { Button, Command, DateTimePicker, NativeSelect, Popover } from "@frontstead/ui";
 import { Calendar } from "@frontstead/ui/calendar";
+import { Command as CommandSubpath } from "@frontstead/ui/command";
 import { DateTimePicker as DateTimePickerSubpath } from "@frontstead/ui/date-time-picker";
 import { SortableTableHead } from "@frontstead/ui/table";
 assert.equal(resolvePublicApiBaseUrl({ NEXT_PUBLIC_API_URL: "https://api.example.com/" }), "https://api.example.com");
@@ -56,6 +57,8 @@ assert.equal(typeof Button, "function");
 assert.equal(typeof NativeSelect, "function");
 assert.equal(typeof Popover, "function");
 assert.equal(typeof Calendar, "function");
+assert.equal(typeof Command, "function");
+assert.equal(CommandSubpath, Command);
 assert.equal(typeof DateTimePicker, "function");
 assert.equal(DateTimePickerSubpath, DateTimePicker);
 assert.equal(typeof SortableTableHead, "function");
@@ -63,8 +66,9 @@ assert.match(import.meta.resolve("@frontstead/tokens/preset.css"), /preset\\.css
 `);
 
   await writeFile(join(directory, "consumer.tsx"), `
-import { Button, DateTimePicker, NativeSelect } from "@frontstead/ui";
+import { Button, Command, CommandDialog, DateTimePicker, NativeSelect } from "@frontstead/ui";
 import { Calendar } from "@frontstead/ui/calendar";
+import { Command as CommandSubpath } from "@frontstead/ui/command";
 import { DateTimePicker as DateTimePickerSubpath } from "@frontstead/ui/date-time-picker";
 import { SortableTableHead } from "@frontstead/ui/table";
 export const form = <form><NativeSelect name="status"><option value="active">Active</option></NativeSelect><Button type="submit" loading={false}>Save</Button></form>;
@@ -72,6 +76,9 @@ export const heading = <SortableTableHead sortDirection="ascending" onSort={() =
 export const calendar = <Calendar mode="single" weekStartsOn={1} />;
 export const dateTimePicker = <DateTimePicker label="Appointment" value={new Date()} onChange={() => {}} timeZone="UTC" minuteStep={15} />;
 export const dateTimePickerSubpath = <DateTimePickerSubpath label="Appointment" onChange={() => {}} />;
+export const command = <Command label="Actions" />;
+export const commandSubpath = <CommandSubpath label="Actions" />;
+export const commandDialog = <CommandDialog title="Actions" description="Choose an action" commandLabel="Actions" open={false}><div /></CommandDialog>;
 `);
   await writeFile(join(directory, "tsconfig.json"), JSON.stringify({
     compilerOptions: {

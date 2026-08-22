@@ -6,6 +6,7 @@
 export * from "./button";
 export * from "./card";
 export * from "./calendar";
+export * from "./command";
 export * from "./date-time-picker";
 export * from "./badge";
 export * from "./dialog";
