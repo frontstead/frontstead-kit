@@ -1,6 +1,6 @@
 {
   "name": "@frontstead/ui",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Accessible React primitives for Frontstead applications.",
   "license": "Apache-2.0",
   "type": "module",
@@ -13,6 +13,7 @@
     "./button": { "types": "./dist/button.d.ts", "import": "./dist/button.js", "default": "./dist/button.js" },
     "./card": { "types": "./dist/card.d.ts", "import": "./dist/card.js", "default": "./dist/card.js" },
     "./calendar": { "types": "./dist/calendar.d.ts", "import": "./dist/calendar.js", "default": "./dist/calendar.js" },
+    "./command": { "types": "./dist/command.d.ts", "import": "./dist/command.js", "default": "./dist/command.js" },
     "./date-time-picker": { "types": "./dist/date-time-picker.d.ts", "import": "./dist/date-time-picker.js", "default": "./dist/date-time-picker.js" },
     "./badge": { "types": "./dist/badge.d.ts", "import": "./dist/badge.js", "default": "./dist/badge.js" },
     "./dialog": { "types": "./dist/dialog.d.ts", "import": "./dist/dialog.js", "default": "./dist/dialog.js" },
@@ -58,6 +59,7 @@
     "@radix-ui/react-toggle-group": "^1.1.11",
     "@radix-ui/react-tooltip": "^1.2.8",
     "class-variance-authority": "^0.7.1",
+    "cmdk": "^1.1.1",
     "lucide-react": "^0.552.0",
     "react-day-picker": "^9.13.2"
   },

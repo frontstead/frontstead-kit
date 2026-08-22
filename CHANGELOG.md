@@ -2,6 +2,11 @@
 
 All notable public changes to Frontstead Kit are documented here.
 
+## [0.12.0.7] - 2026-08-21
+
+### Added
+- `@frontstead/ui` now includes brand-neutral Command primitives with required accessible labels and dialog descriptions, grouped and disabled items, empty and loading states, and consumer-owned command behavior.
+
 ## [0.12.0.6] - 2026-08-21
 
 ### Added
