@@ -1,6 +1,6 @@
 {
   "name": "@frontstead/ui",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Accessible React primitives for Frontstead applications.",
   "license": "Apache-2.0",
   "type": "module",
@@ -36,6 +36,7 @@
     "./toggle": { "types": "./dist/toggle.d.ts", "import": "./dist/toggle.js", "default": "./dist/toggle.js" },
     "./toggle-group": { "types": "./dist/toggle-group.d.ts", "import": "./dist/toggle-group.js", "default": "./dist/toggle-group.js" },
     "./scroll-area": { "types": "./dist/scroll-area.d.ts", "import": "./dist/scroll-area.js", "default": "./dist/scroll-area.js" },
+    "./selection-card": { "types": "./dist/selection-card.d.ts", "import": "./dist/selection-card.js", "default": "./dist/selection-card.js" },
     "./table": { "types": "./dist/table.d.ts", "import": "./dist/table.js", "default": "./dist/table.js" },
     "./sheet": { "types": "./dist/sheet.d.ts", "import": "./dist/sheet.js", "default": "./dist/sheet.js" },
     "./alert-dialog": { "types": "./dist/alert-dialog.d.ts", "import": "./dist/alert-dialog.js", "default": "./dist/alert-dialog.js" },

@@ -26,6 +26,7 @@ export * from "./tooltip";
 export * from "./toggle";
 export * from "./toggle-group";
 export * from "./scroll-area";
+export * from "./selection-card";
 export * from "./table";
 export * from "./sheet";
 export * from "./alert-dialog";

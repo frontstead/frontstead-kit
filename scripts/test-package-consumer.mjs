@@ -46,10 +46,11 @@ try {
 import assert from "node:assert/strict";
 import { resolvePublicApiBaseUrl } from "@frontstead/api-client";
 import { compileThemeCss } from "@frontstead/tokens/theme";
-import { Button, Command, DateTimePicker, NativeSelect, Popover } from "@frontstead/ui";
+import { Button, Command, DateTimePicker, NativeSelect, Popover, SelectionCard } from "@frontstead/ui";
 import { Calendar } from "@frontstead/ui/calendar";
 import { Command as CommandSubpath } from "@frontstead/ui/command";
 import { DateTimePicker as DateTimePickerSubpath } from "@frontstead/ui/date-time-picker";
+import { SelectionCard as SelectionCardSubpath } from "@frontstead/ui/selection-card";
 import { SortableTableHead } from "@frontstead/ui/table";
 assert.equal(resolvePublicApiBaseUrl({ NEXT_PUBLIC_API_URL: "https://api.example.com/" }), "https://api.example.com");
 assert.match(compileThemeCss({ palette: { primary: "#065f46" } }), /--primary:/);
@@ -61,15 +62,18 @@ assert.equal(typeof Command, "function");
 assert.equal(CommandSubpath, Command);
 assert.equal(typeof DateTimePicker, "function");
 assert.equal(DateTimePickerSubpath, DateTimePicker);
+assert.equal(typeof SelectionCard, "function");
+assert.equal(SelectionCardSubpath, SelectionCard);
 assert.equal(typeof SortableTableHead, "function");
 assert.match(import.meta.resolve("@frontstead/tokens/preset.css"), /preset\\.css$/);
 `);
 
   await writeFile(join(directory, "consumer.tsx"), `
-import { Button, Command, CommandDialog, DateTimePicker, NativeSelect } from "@frontstead/ui";
+import { Button, Command, CommandDialog, DateTimePicker, NativeSelect, SelectionCard } from "@frontstead/ui";
 import { Calendar } from "@frontstead/ui/calendar";
 import { Command as CommandSubpath } from "@frontstead/ui/command";
 import { DateTimePicker as DateTimePickerSubpath } from "@frontstead/ui/date-time-picker";
+import { SelectionCard as SelectionCardSubpath } from "@frontstead/ui/selection-card";
 import { SortableTableHead } from "@frontstead/ui/table";
 export const form = <form><NativeSelect name="status"><option value="active">Active</option></NativeSelect><Button type="submit" loading={false}>Save</Button></form>;
 export const heading = <SortableTableHead sortDirection="ascending" onSort={() => {}}>Price</SortableTableHead>;
@@ -79,6 +83,8 @@ export const dateTimePickerSubpath = <DateTimePickerSubpath label="Appointment" 
 export const command = <Command label="Actions" />;
 export const commandSubpath = <CommandSubpath label="Actions" />;
 export const commandDialog = <CommandDialog title="Actions" description="Choose an action" commandLabel="Actions" open={false}><div /></CommandDialog>;
+export const selectionCard = <SelectionCard type="checkbox" name="choice" value="one" label="Choice" />;
+export const selectionCardSubpath = <SelectionCardSubpath type="radio" name="choice" value="two" label="Other choice" />;
 `);
   await writeFile(join(directory, "tsconfig.json"), JSON.stringify({
     compilerOptions: {
