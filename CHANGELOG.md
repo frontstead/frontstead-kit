@@ -2,6 +2,11 @@
 
 All notable public changes to Frontstead Kit are documented here.
 
+## [0.12.0.8] - 2026-08-21
+
+### Added
+- `@frontstead/ui` now includes a native-input `SelectionCard` composition for accessible radio and checkbox choices with visual content, descriptions, errors, and selected, focus, disabled, and reduced-motion states.
+
 ## [0.12.0.7] - 2026-08-21
 
 ### Added
