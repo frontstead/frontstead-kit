@@ -85,6 +85,7 @@ For the portable container baseline, see [Docker Compose](./COMPOSE.md). Service
 - [MLS compliance framework](./MLS_COMPLIANCE.md)
 - [Classification and listing collections](./CLASSIFICATION.md)
 - [Data table boundary](./DATA_TABLES.md)
+- [Sidebar shell boundary](./SIDEBAR_SHELL.md)
 - [Shared package releases](./PACKAGE_RELEASES.md)
 - [Public roadmap](./ROADMAP.md)
 
