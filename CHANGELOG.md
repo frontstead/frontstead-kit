@@ -2,6 +2,11 @@
 
 All notable public changes to Frontstead Kit are documented here.
 
+## [0.12.0.6] - 2026-08-21
+
+### Added
+- `@frontstead/ui` now includes a controlled, accessible `DateTimePicker` with explicit local/UTC semantics, stepped time selection, date and datetime bounds, disabled-date policy, and ISO hidden-input form submission.
+
 ## [0.12.0.5] - 2026-08-20
 
 ### Added
