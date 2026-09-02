@@ -13,7 +13,7 @@
     "schema": "./prisma/schema.prisma"
   },
   "dependencies": {
-    "@faker-js/faker": "^8.4.1",
+    "@faker-js/faker": "^10.6.0",
     "@frontstead/portal-config": "*",
     "@prisma/adapter-pg": "^7.4.0",
     "@prisma/client": "^7.4.0",
