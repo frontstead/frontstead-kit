@@ -33,11 +33,14 @@ jobs:
         env:
           DATABASE_URL: postgresql://ci:ci@localhost:5432/frontstead_test
 
+      # Each step skips a version that is already on the registry, so a release
+      # where only one package changed does not fail on the others. Keep tokens
+      # before ui: ui depends on it.
       - name: Publish tokens
-        run: npm publish --workspace=@frontstead/tokens --access public --provenance
+        run: node scripts/publish-if-needed.mjs packages/tokens
 
       - name: Publish UI
-        run: npm publish --workspace=@frontstead/ui --access public --provenance
+        run: node scripts/publish-if-needed.mjs packages/ui
 
       - name: Publish API client
-        run: npm publish --workspace=@frontstead/api-client --access public --provenance
+        run: node scripts/publish-if-needed.mjs packages/api-client
