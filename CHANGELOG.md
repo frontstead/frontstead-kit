@@ -2,6 +2,11 @@
 
 All notable public changes to Frontstead Kit are documented here.
 
+## [0.12.0.9] - 2026-10-04
+
+### Security
+- Next.js upgraded from 16.2.11 to 16.3.8, clearing three critical advisories: unauthenticated remote code execution in the Image Optimization API when AVIF files are used, unauthenticated remote code execution on Windows-hosted servers, and remote code execution in `next/og` `ImageResponse`.
+
 ## [0.12.0.8] - 2026-08-21
 
 ### Added
