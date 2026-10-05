@@ -23,7 +23,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1045.0",
-    "axios": "^1.18.1",
+    "axios": "^1.20.0",
     "db": "*",
     "dotenv": "^16.3.1",
     "node-cron": "^4.6.0",
