@@ -1,0 +1,7 @@
+# Copy to backend.hcl (gitignored). The state holds the database password and
+# generated secrets: use a private, versioned, encrypted bucket.
+bucket       = "example-terraform-state"
+key          = "frontstead/terraform.tfstate"
+region       = "us-east-1"
+encrypt      = true
+use_lockfile = true

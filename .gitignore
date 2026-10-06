@@ -42,3 +42,11 @@ pnpm-debug.log*
 # Internal/generated planning artifacts
 *.docx
 DESIGN_PREVIEW.html
+
+# Terraform (deploy/aws): local provider cache, state, and per-account values
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+deploy/aws/backend.hcl

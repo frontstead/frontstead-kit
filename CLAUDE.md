@@ -215,5 +215,9 @@ GitHub OIDC trusted-publishing workflow in `.github/workflows/publish-packages.y
 - API-specific variables belong in `apps/api/.env` or the API service environment, not the
   root `.env`.
 - Deployment domains point directly at the root of `apps/portal`.
+- `deploy/aws/` is a flat Terraform root config plus `deploy.sh` for ECS Fargate
+  (`docs/AWS_ECS.md`). Its task definitions hardcode the fail-closed values above; keep
+  them in step when adding env vars. Scheduled jobs reuse `/api/cron/*` through
+  `apps/api/scripts/run-cron.ts`, so a new cron route needs only a `cron_jobs` entry.
 - Railway's internal PostgreSQL hostnames resolve only inside Railway; from a workstation use
   the service's public URL and never commit or log it.

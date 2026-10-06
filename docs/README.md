@@ -73,7 +73,7 @@ npm run typecheck:portal
 npm run typecheck:mls
 ```
 
-For the portable container baseline, see [Docker Compose](./COMPOSE.md). Service-by-service Railway guidance remains in [DEPLOYMENT.md](./DEPLOYMENT.md).
+For the portable container baseline, see [Docker Compose](./COMPOSE.md). Service-by-service Railway guidance remains in [DEPLOYMENT.md](./DEPLOYMENT.md), and an ECS Fargate stack is in [AWS_ECS.md](./AWS_ECS.md).
 
 ## Reference
 
@@ -81,6 +81,7 @@ For the portable container baseline, see [Docker Compose](./COMPOSE.md). Service
 - [Database operations](./DATABASE.md)
 - [Docker Compose](./COMPOSE.md)
 - [Railway deployment](./DEPLOYMENT.md)
+- [AWS ECS Fargate deployment](./AWS_ECS.md)
 - [MLS board setup](./MLS_BOARD_SETUP.md)
 - [MLS compliance framework](./MLS_COMPLIANCE.md)
 - [Classification and listing collections](./CLASSIFICATION.md)

@@ -1,0 +1,16 @@
+# Copy to terraform.tfvars (gitignored) and fill in.
+aws_region      = "us-east-1"
+domain_name     = "homes.example.com"
+route53_zone_id = "Z0000000000000000000"
+email_from      = "Example Realty <notifications@example.com>"
+
+# Keep false until MLS board approval (docs/MLS_COMPLIANCE.md).
+mls_enabled                = false
+mls_public_display_enabled = false
+
+# mls_environment = {
+#   MLS_AUTH_TYPE = "bearer"
+#   MLS_BASE_URL  = "https://api.mlsgrid.com/v2"
+#   MLS_BOARD_ID  = "..."
+#   MLS_PREFIX    = "..."
+# }
