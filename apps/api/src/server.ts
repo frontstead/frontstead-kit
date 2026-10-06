@@ -21,6 +21,7 @@ import compression from 'compression';
 import rateLimit from 'express-rate-limit';
 import morgan from 'morgan';
 import logger from './utils/logger.js';
+import { prisma } from 'db';
 
 // Import routes
 import authRoutes from './routes/auth.js';
@@ -131,8 +132,7 @@ export function createApp(options: CreateAppOptions = {}) {
         timestamp: new Date().toISOString(),
         uptime: process.uptime(),
         search: {
-          engine: 'Typesense',
-          status: 'active'
+          engine: isTypesenseConfigured() ? 'Typesense' : 'PostgreSQL',
         }
       });
     } catch (error) {
@@ -219,10 +219,30 @@ export const startServer = async () => {
   await ensureBootstrapAdmin();
 
   const port = process.env.API_PORT || 3001;
-  app.listen(port, () => {
+  const server = app.listen(port, () => {
     logger.info(`🚀 API Server running on port ${port}`);
     logger.info(`📊 Health check available at http://localhost:${port}/health`);
   });
+
+  // Container platforms (ECS, Compose, Railway) send SIGTERM before killing the
+  // task. Stop accepting connections, let in-flight requests finish, then close
+  // the database pool. The hard timeout stays under ECS's default 30s stopTimeout.
+  let shuttingDown = false;
+  const shutdown = (signal: string) => {
+    if (shuttingDown) return;
+    shuttingDown = true;
+    logger.info(`Received ${signal}, shutting down...`);
+    setTimeout(() => {
+      logger.error('Graceful shutdown timed out; exiting');
+      process.exit(1);
+    }, 25_000).unref();
+    server.close(() => {
+      prisma.$disconnect().finally(() => process.exit(0));
+    });
+    server.closeIdleConnections();
+  };
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
 };
 
 if (process.argv[1] && resolve(process.argv[1]) === __filename) {

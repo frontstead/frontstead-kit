@@ -3,6 +3,7 @@ import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { getPortalReadiness } from './portalReadinessService.js';
 import logger from '../utils/logger.js';
+import { s3ClientConfig } from '../utils/storage.js';
 
 const RESERVED_SLUGS = new Set(['www', 'api', 'app', 'admin', 'mail', 'portal']);
 const SLUG_REGEX = /^[a-z0-9-]+$/;
@@ -41,22 +42,16 @@ export async function generateLogoUploadUrl(portalId: string, agentId: string, c
 
   await checkOwnership(portalId, agentId);
 
-  const endpoint = process.env.STORAGE_ENDPOINT;
+  const config = s3ClientConfig();
   const bucket = process.env.STORAGE_BUCKET;
-  const accessKey = process.env.STORAGE_ACCESS_KEY;
-  const secretKey = process.env.STORAGE_SECRET_KEY;
 
-  if (!endpoint || !bucket || !accessKey || !secretKey) {
+  if (!config) {
     const err: any = new Error('Storage not configured');
     err.statusCode = 503;
     throw err;
   }
 
-  const client = new S3Client({
-    endpoint,
-    region: 'auto',
-    credentials: { accessKeyId: accessKey, secretAccessKey: secretKey },
-  });
+  const client = new S3Client(config);
 
   const ext = contentType === 'image/png' ? 'png' : contentType === 'image/webp' ? 'webp' : 'jpg';
   const key = `portals/${portalId}/logo.${ext}`;

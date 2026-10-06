@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// Create logs directory if it doesn't exist
+// Directory for the optional rotating log files (LOG_TO_FILE=true)
 const logDir = path.join(__dirname, '../../logs');
 
 // Define log format
@@ -33,34 +33,44 @@ const consoleFormat = winston.format.combine(
   })
 );
 
-// Create transports
-const transports = [
-  // Console transport for development
+const isProduction = process.env.NODE_ENV === 'production';
+
+// Containers ship stdout to the platform's log store (CloudWatch, Railway), which
+// wants one JSON object per line. Local development keeps the readable format.
+const jsonLineFormat = winston.format.combine(
+  winston.format.timestamp(),
+  winston.format.errors({ stack: true }),
+  winston.format.json()
+);
+
+const transports: winston.transport[] = [
   new winston.transports.Console({
-    level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
-    format: consoleFormat
-  }),
-
-  // Daily rotating file for all logs
-  new DailyRotateFile({
-    filename: path.join(logDir, 'mls-service-%DATE%.log'),
-    datePattern: 'YYYY-MM-DD',
-    maxFiles: '30d',
-    maxSize: '20m',
-    format: logFormat,
-    level: 'info'
-  }),
-
-  // Daily rotating file for errors only
-  new DailyRotateFile({
-    filename: path.join(logDir, 'mls-service-error-%DATE%.log'),
-    datePattern: 'YYYY-MM-DD',
-    maxFiles: '30d',
-    maxSize: '20m',
-    format: logFormat,
-    level: 'error'
+    level: isProduction ? 'info' : 'debug',
+    format: isProduction ? jsonLineFormat : consoleFormat
   })
 ];
+
+// Rotating files only make sense on a host with a persistent disk; opt in.
+if (process.env.LOG_TO_FILE === 'true') {
+  transports.push(
+    new DailyRotateFile({
+      filename: path.join(logDir, 'mls-service-%DATE%.log'),
+      datePattern: 'YYYY-MM-DD',
+      maxFiles: '30d',
+      maxSize: '20m',
+      format: logFormat,
+      level: 'info'
+    }),
+    new DailyRotateFile({
+      filename: path.join(logDir, 'mls-service-error-%DATE%.log'),
+      datePattern: 'YYYY-MM-DD',
+      maxFiles: '30d',
+      maxSize: '20m',
+      format: logFormat,
+      level: 'error'
+    })
+  );
+}
 
 // Create logger
 const logger = winston.createLogger({

@@ -21,15 +21,22 @@ RUN apk add --no-cache openssl libc6-compat
 
 RUN addgroup -g 1001 -S nodejs && adduser -S mlsservice -u 1001
 
+# Amazon RDS CA bundle, so DATABASE_URL can verify RDS certificates; see
+# docs/AWS_ECS.md. Harmless elsewhere: nothing reads it unless the URL names it. If AWS rotates the
+# bundle, update the checksum (curl the URL and `shasum -a 256` it).
+ADD --chmod=644 --checksum=sha256:fe45bbebf92ad3e27a583bbb2ddd1553c521ed4d49af5514dc0a40372ea5395c \
+  https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem /etc/ssl/certs/rds-global-bundle.pem
+
 COPY --from=builder --chown=mlsservice:nodejs /app /app
-RUN mkdir -p /app/apps/mls-service/logs && chown mlsservice:nodejs /app/apps/mls-service/logs
 
 USER mlsservice
+WORKDIR /app/apps/mls-service
 
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD node -e "console.log('MLS Service Health Check: OK')" || exit 1
 
-CMD ["npm", "start", "--workspace=@frontstead/mls-service"]
+# node is PID 1 directly (not npm) so SIGTERM reaches the worker's shutdown handler.
+CMD ["node", "--import", "tsx", "src/index.ts"]
 
 LABEL maintainer="Frontstead Team"
 LABEL description="MLS Data Synchronization Service"

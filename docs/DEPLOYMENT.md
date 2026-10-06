@@ -1,6 +1,6 @@
 # Railway Deployment
 
-This document describes service-by-service Railway deployment. For the canonical portable baseline, use [Docker Compose](./COMPOSE.md).
+This document describes service-by-service Railway deployment. For the canonical portable baseline, use [Docker Compose](./COMPOSE.md); for AWS, see [AWS_ECS.md](./AWS_ECS.md).
 
 ## Runtime Requirements
 
@@ -32,10 +32,8 @@ Start command: npm run start:api
 Do not use root `npm run build` for the API service; it builds every buildable workspace. The start command only starts the API and does not apply database migrations.
 
 Unlike the portal, the API builds with Railpack rather than its Dockerfile.
-`prisma generate` reads `DATABASE_URL` through `packages/db/prisma.config.ts`,
-and Railpack has the service variables in scope at build time while a Docker
-build does not, so `apps/api/Dockerfile` currently fails at that step. Use it
-only with `DATABASE_URL` supplied as a build argument.
+`apps/api/Dockerfile` also works: it supplies a placeholder `DATABASE_URL` for
+`prisma generate`, which never connects, and reads the real URL at runtime.
 
 Minimum variables:
 

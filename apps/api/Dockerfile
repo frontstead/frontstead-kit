@@ -32,11 +32,20 @@ RUN apk add --no-cache openssl libc6-compat
 
 RUN addgroup -g 1001 -S nodejs && adduser -S api -u 1001
 
+# Amazon RDS CA bundle, so connection strings can verify RDS certificates; see
+# docs/AWS_ECS.md (node-pg and Prisma migrate name it differently). Harmless
+# elsewhere: nothing reads it unless the URL names it. If AWS rotates the
+# bundle, update the checksum (curl the URL and `shasum -a 256` it).
+ADD --chmod=644 --checksum=sha256:fe45bbebf92ad3e27a583bbb2ddd1553c521ed4d49af5514dc0a40372ea5395c \
+  https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem /etc/ssl/certs/rds-global-bundle.pem
+
 COPY --from=builder --chown=api:nodejs /app /app
 
 USER api
+WORKDIR /app/apps/api
 
 ENV API_PORT=3001
 EXPOSE 3001
 
-CMD ["npm", "start", "--workspace=api"]
+# node is PID 1 directly (not npm) so SIGTERM reaches the server's shutdown handler.
+CMD ["node", "--import", "tsx", "src/server.ts"]
