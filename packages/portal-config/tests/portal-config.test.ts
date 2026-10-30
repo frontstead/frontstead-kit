@@ -23,11 +23,10 @@ describe('portal config', () => {
     expect(config.domains.length).toBeGreaterThan(0);
   });
 
-  // Only the shape is asserted. Whether a portal may actually show listings is
-  // decided by getPortalReadiness (the idx-approval gate), not here —
-  // mode 'db' with idxApproved false is a legitimate mid-setup state for a
-  // deployment wiring up listings before its board approval lands, and
-  // portalReadinessService.unit.test.ts already covers that gate.
+  // Only the shape is asserted. Which listings a portal may show is decided
+  // by getPortalReadiness, not here: mode 'db' with idxApproved false is a
+  // legitimate state that shows only non-MLS listings until board approval
+  // lands, and portalReadinessService.unit.test.ts covers that gate.
   it('resolves a valid listing policy', () => {
     const policy = getPortalListingPolicy();
 

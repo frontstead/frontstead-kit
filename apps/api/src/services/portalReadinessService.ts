@@ -1,4 +1,4 @@
-import { Prisma, PropertyType, prisma } from 'db';
+import { ListingSource, Prisma, PropertyType, prisma } from 'db';
 import { getPortalConfig, type PublicPortalConfig, toPublicPortalConfig } from '@frontstead/portal-config';
 import { resolveMlsBoardName } from '../utils/mlsBoardName.js';
 import { compileCollectionPredicate } from 'search/collectionPredicate';
@@ -114,12 +114,19 @@ function isValidPropertyType(value: string): value is PropertyType {
 // match side applied the price range, a property with multiple listings
 // could match via an in-range listing but *display* a different,
 // out-of-range one.
+//
+// idxApproved: IDX approval covers MLS listings only. Until a portal's approval
+// lands it can still show listings that did not come from an MLS (an agent's
+// own, entered by hand). MLS listings also need MLS_PUBLIC_DISPLAY_ENABLED,
+// which buildPublicListingWhere applies.
 function buildActiveListingWhere(
   boardIds: string[],
-  priceFilters: { minPrice?: number; maxPrice?: number } = {}
+  priceFilters: { minPrice?: number; maxPrice?: number } = {},
+  idxApproved = true
 ): Prisma.ListingWhereInput {
   return buildPublicListingWhere({
     ...(boardIds.length > 0 ? { mlsBoardId: { in: boardIds } } : {}),
+    ...(idxApproved ? {} : { source: { not: ListingSource.MLS } }),
     ...(priceFilters.minPrice != null || priceFilters.maxPrice != null
       ? {
           listPrice: {
@@ -134,15 +141,16 @@ function buildActiveListingWhere(
 export function buildPortalPropertyWhere(
   portal: PortalForReadiness,
   boardIds: string[] = [],
-  filters: PortalPropertyFilters = {}
+  filters: PortalPropertyFilters = {},
+  idxApproved = true
 ): Prisma.PropertyWhereInput | null {
   const collections = publishedCollections(portal);
   if (collections.length === 0) return null;
 
   const where: Prisma.PropertyWhereInput = {
     AND: [
-      { OR: collections.map((collection) => compileCollectionPredicate(collection.predicate, { accountId: portal.accountId, portalId: portal.id, boardIds, collectionId: collection.id, publicVisibility: true })) },
-      { listings: { some: buildActiveListingWhere(boardIds, { minPrice: filters.minPrice, maxPrice: filters.maxPrice }) } },
+      { OR: collections.map((collection) => compileCollectionPredicate(collection.predicate, { accountId: portal.accountId, portalId: portal.id, boardIds, collectionId: collection.id, publicVisibility: true, ...(idxApproved ? {} : { excludeMls: true }) })) },
+      { listings: { some: buildActiveListingWhere(boardIds, { minPrice: filters.minPrice, maxPrice: filters.maxPrice }, idxApproved) } },
     ],
     // Math.trunc: bedrooms is a typed Int column — a fractional query param
     // (e.g. ?bedrooms=2.5) would otherwise reach Prisma as a float and throw
@@ -172,8 +180,8 @@ export function buildPortalPropertyWhere(
   return where;
 }
 
-async function countMatchingListings(portal: PortalForReadiness, boardIds: string[]) {
-  const where = buildPortalPropertyWhere(portal, boardIds);
+async function countMatchingListings(portal: PortalForReadiness, boardIds: string[], idxApproved: boolean) {
+  const where = buildPortalPropertyWhere(portal, boardIds, {}, idxApproved);
   if (!where) return 0;
   return prisma.property.count({ where });
 }
@@ -220,12 +228,12 @@ export async function getPortalReadiness(portal: PortalForReadiness): Promise<Po
       gate(
         'idx-approval',
         'IDX approval',
-        config.compliance.idxApproved ? 'passed' : source === 'default' ? 'warning' : 'blocked',
+        config.compliance.idxApproved ? 'passed' : 'warning',
         config.compliance.idxApproved
           ? undefined
           : source === 'default'
             ? 'No code-defined IDX policy exists; using DB portal defaults.'
-            : 'IDX approval must be true before real listings can be displayed.'
+            : 'Not approved yet: MLS listings stay hidden. Listings that did not come from an MLS can show.'
       )
     );
 
@@ -238,7 +246,7 @@ export async function getPortalReadiness(portal: PortalForReadiness): Promise<Po
       )
     );
 
-    const matchCount = await countMatchingListings(portal, config.listings.boardIds);
+    const matchCount = await countMatchingListings(portal, config.listings.boardIds, config.compliance.idxApproved);
     gates.push(
       gate(
         'listings-match',
@@ -273,7 +281,10 @@ function decimalToNumber(value: unknown) {
   return Number.isFinite(n) ? n : null;
 }
 
-function toPortalProperty(property: any, selectedListing?: any) {
+// sharedMedia: Property.media carries no listing provenance, so it may be MLS
+// media; show it only when MLS listings may show (IDX approval plus
+// MLS_PUBLIC_DISPLAY_ENABLED).
+function toPortalProperty(property: any, selectedListing: any, sharedMedia: boolean) {
   const listing = selectedListing ?? property.listings?.[0] ?? null;
   return {
     id: property.id,
@@ -286,16 +297,16 @@ function toPortalProperty(property: any, selectedListing?: any) {
     bedrooms: property.bedrooms ?? listing?.bedrooms ?? null,
     bathrooms: property.bathrooms ?? listing?.bathrooms ?? null,
     squareFeet: property.squareFeet ?? listing?.squareFeet ?? null,
-    imageUrl: listing?.imageUrl ?? (isMlsPublicDisplayEnabled() ? property.media?.[0]?.url ?? null : null),
+    imageUrl: listing?.imageUrl ?? (sharedMedia ? property.media?.[0]?.url ?? null : null),
     slug: listing?.slug ?? null,
     status: listing?.status ?? null,
     listingId: listing?.id ?? null,
   };
 }
 
-function toPortalPropertyDetail(property: any, listing: any) {
+function toPortalPropertyDetail(property: any, listing: any, sharedMedia: boolean) {
   return {
-    ...toPortalProperty(property, listing),
+    ...toPortalProperty(property, listing, sharedMedia),
     propertyType: property.propertyType ?? null,
     lotSize: decimalToNumber(property.lotSize),
     yearBuilt: property.yearBuilt ?? null,
@@ -310,7 +321,7 @@ function toPortalPropertyDetail(property: any, listing: any) {
     listingAgentName: listing.listingAgentName ?? null,
     brokerageName: listing.brokerageName ?? null,
     brokeragePhone: listing.brokeragePhone ?? null,
-    media: (isMlsPublicDisplayEnabled() ? property.media ?? [] : []).map((item: any) => ({
+    media: (sharedMedia ? property.media ?? [] : []).map((item: any) => ({
       id: item.id,
       url: item.url,
       caption: item.caption ?? null,
@@ -338,6 +349,7 @@ export async function getPortalListings(portal: PortalForReadiness, query: Porta
   }
 
   const { config } = resolvePublicConfig(portal.slug);
+  const { idxApproved } = config.compliance;
   const where = buildPortalPropertyWhere(portal, config.listings.boardIds, {
     q: query.q,
     minPrice: query.minPrice,
@@ -345,7 +357,7 @@ export async function getPortalListings(portal: PortalForReadiness, query: Porta
     bedrooms: query.bedrooms,
     bathrooms: query.bathrooms,
     propertyType: query.propertyType,
-  });
+  }, idxApproved);
   if (!where) {
     return {
       properties: [],
@@ -358,7 +370,8 @@ export async function getPortalListings(portal: PortalForReadiness, query: Porta
   const listingWhere = buildActiveListingWhere(config.listings.boardIds, {
     minPrice: query.minPrice,
     maxPrice: query.maxPrice,
-  });
+  }, idxApproved);
+  const sharedMedia = idxApproved && isMlsPublicDisplayEnabled();
 
   const [properties, total] = await Promise.all([
     prisma.property.findMany({
@@ -379,7 +392,7 @@ export async function getPortalListings(portal: PortalForReadiness, query: Porta
     // Wrap the callback: Array#map passes (element, index), and a bare reference
     // would feed the index into `selectedListing`, which `??` treats as a real
     // value (0 is not nullish) — nulling out every listing-derived field.
-    properties: properties.map((property) => toPortalProperty(property)),
+    properties: properties.map((property) => toPortalProperty(property, undefined, sharedMedia)),
     pagination: { page, limit, total, totalPages, hasNext: page < totalPages, hasPrev: page > 1 },
     readiness,
   };
@@ -390,10 +403,11 @@ export async function getPortalProperty(portal: PortalForReadiness, identifier: 
   if (!readiness.canShowListings) return null;
 
   const { config } = resolvePublicConfig(portal.slug);
-  const scopedWhere = buildPortalPropertyWhere(portal, config.listings.boardIds);
+  const { idxApproved } = config.compliance;
+  const scopedWhere = buildPortalPropertyWhere(portal, config.listings.boardIds, {}, idxApproved);
   if (!scopedWhere) return null;
 
-  const listingWhere = buildActiveListingWhere(config.listings.boardIds);
+  const listingWhere = buildActiveListingWhere(config.listings.boardIds, {}, idxApproved);
   const property = await prisma.property.findFirst({
     where: {
       AND: [
@@ -421,5 +435,5 @@ export async function getPortalProperty(portal: PortalForReadiness, identifier: 
   const listing = property.id === identifier
     ? property.listings[0]
     : property.listings.find((item) => item.slug === identifier);
-  return listing ? toPortalPropertyDetail(property, listing) : null;
+  return listing ? toPortalPropertyDetail(property, listing, idxApproved && isMlsPublicDisplayEnabled()) : null;
 }

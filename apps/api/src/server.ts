@@ -131,7 +131,7 @@ export function createApp(options: CreateAppOptions = {}) {
         timestamp: new Date().toISOString(),
         uptime: process.uptime(),
         search: {
-          engine: 'Typesense',
+          engine: isTypesenseConfigured() ? 'Typesense' : 'PostgreSQL',
           status: 'active'
         }
       });

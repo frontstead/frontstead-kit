@@ -11,6 +11,10 @@ RUN npm ci
 
 FROM base AS builder
 COPY --from=deps /app /app
+# `prisma generate` needs a syntactically valid DATABASE_URL and never connects.
+# The placeholder stays in this stage; see apps/api/Dockerfile for the details.
+ARG DATABASE_URL=postgresql://placeholder:placeholder@127.0.0.1:5432/placeholder
+ENV DATABASE_URL=$DATABASE_URL
 RUN npm run build --workspace=db
 
 FROM node:22.12-alpine AS runner

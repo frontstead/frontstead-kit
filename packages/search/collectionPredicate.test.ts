@@ -38,6 +38,13 @@ describe('collection predicate semantics', () => {
     process.env.MLS_PUBLIC_DISPLAY_ENABLED = 'true';
     expect(JSON.stringify(compileCollectionPredicate({}, { accountId: 'a1', portalId: 'p1', boardIds: [], publicVisibility: true }))).not.toContain('"source"');
   });
+  it('excludes MLS listings before IDX approval, even with MLS display enabled', () => {
+    process.env.MLS_PUBLIC_DISPLAY_ENABLED = 'true';
+    const publicWhere = compileCollectionPredicate({}, { accountId: 'a1', portalId: 'p1', boardIds: [], publicVisibility: true, excludeMls: true });
+    expect(JSON.stringify(publicWhere)).toContain('"source":{"not":"MLS"}');
+    const ownerWhere = compileCollectionPredicate({}, { accountId: 'a1', portalId: 'p1', boardIds: [], excludeMls: true });
+    expect(JSON.stringify(ownerWhere)).toContain('"source":{"not":"MLS"}');
+  });
   it('does not apply the public MLS gate to authenticated collection workflows', () => {
     const where = compileCollectionPredicate({}, { accountId: 'a1', portalId: 'p1', boardIds: ['board-1'] });
     const serialized = JSON.stringify(where);
