@@ -82,9 +82,12 @@ router.delete('/collections/:id', async (req, res, next) => { try { const row = 
 
 router.post('/collections/:id/preview', async (req, res, next) => { try {
   const row = await ownerCollection(req.user.id, req.params.id); if (!row) return res.status(404).json({ error: 'Collection not found' });
-  if (!row.portal.isActive || row.portal.suspendedAt || !getPortalConfig().compliance.idxApproved) return res.json({ count: 0, examples: [], gated: true });
+  if (!row.portal.isActive || row.portal.suspendedAt) return res.json({ count: 0, examples: [], gated: true });
   const predicate = req.body?.predicate === undefined ? row.predicate : await validatePredicateForAccount(req.body.predicate, row.portal.accountId);
-  const boardIds = getPortalConfig().listings.boardIds; const where = compileCollectionPredicate(predicate, { accountId: row.portal.accountId, portalId: row.portal.id, boardIds, collectionId: row.id });
+  // Before IDX approval the preview counts what the portal can show: listings
+  // that did not come from an MLS.
+  const { idxApproved } = getPortalConfig().compliance;
+  const boardIds = getPortalConfig().listings.boardIds; const where = compileCollectionPredicate(predicate, { accountId: row.portal.accountId, portalId: row.portal.id, boardIds, collectionId: row.id, ...(idxApproved ? {} : { excludeMls: true }) });
   const [count, examples] = await Promise.all([prisma.property.count({ where }), prisma.property.findMany({ where, take: 8, select: { id: true, address: true, city: true, state: true } })]);
   res.json({ count, examples: examples.map((example) => ({ ...example, whyMatched: 'Matched collection predicate and all authoritative listing gates.' })) });
 } catch (e) { if (e?.name === 'ZodError') return bad(res, e); next(e); } });

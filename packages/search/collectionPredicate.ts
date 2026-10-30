@@ -1,8 +1,10 @@
 import { parseCollectionPredicate, type CollectionPredicate, type NumericPredicate } from '@frontstead/portal-config';
-import { ListingStatus, type Prisma, type PropertyType } from 'db';
+import { ListingSource, ListingStatus, type Prisma, type PropertyType } from 'db';
 import { buildPublicListingWhere } from './propertyVisibility.js';
 
-export interface CollectionScope { accountId: string; portalId: string; boardIds: string[]; collectionId?: string; publicVisibility?: boolean }
+// excludeMls: the portal's IDX approval has not landed, so only listings that
+// did not come from an MLS are eligible.
+export interface CollectionScope { accountId: string; portalId: string; boardIds: string[]; collectionId?: string; publicVisibility?: boolean; excludeMls?: boolean }
 
 function scalarNumber(field: string, rule: NumericPredicate): Prisma.PropertyWhereInput {
   if (rule.nulls === 'only') return { [field]: null } as Prisma.PropertyWhereInput;
@@ -34,6 +36,7 @@ export function compileCollectionPredicate(value: unknown, scope: CollectionScop
   const baseListing = (additional?: Prisma.ListingWhereInput): Prisma.ListingWhereInput => {
     const where = {
       ...(scope.boardIds.length ? { mlsBoardId: { in: scope.boardIds } } : {}),
+      ...(scope.excludeMls ? { source: { not: ListingSource.MLS } } : {}),
       ...additional,
     };
     return scope.publicVisibility

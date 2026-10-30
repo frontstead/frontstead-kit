@@ -2,6 +2,16 @@
 
 All notable public changes to Frontstead Kit are documented here.
 
+## [0.12.0.10] - 2026-10-30
+
+### Changed
+- IDX approval (`compliance.idxApproved` in the portal config) now gates MLS listings only. Before approval, a portal in `db` listing mode shows listings that did not come from an MLS, such as an agent's own listings, instead of showing nothing; readiness reports IDX approval as a warning. MLS listings and shared property media still need both IDX approval and `MLS_PUBLIC_DISPLAY_ENABLED=true`. The owner collection preview counts the same listings the portal can show instead of returning nothing before approval.
+
+### Fixed
+- `/health` reports the search engine actually in use (`PostgreSQL` without `TYPESENSE_HOST`) instead of always `Typesense`.
+- The MLS worker image builds again: its Dockerfile now sets the placeholder `DATABASE_URL` that `prisma generate` needs, as the API's does.
+- `db:seed:demo-listings` publishes the collection it creates, so the demo listings appear on the portal.
+
 ## [0.12.0.9] - 2026-10-04
 
 ### Security

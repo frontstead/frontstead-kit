@@ -75,7 +75,7 @@ async function main() {
 
   const existingCollection = await prisma.listingCollection.findUnique({ where: { portalId_slug: { portalId: portal.id, slug: 'demo-communities' } } });
   if (existingCollection) { console.log(`⏭️  "${SEGMENT_NAME}" already exists (${existingCollection.id}) — skipping.`); return; }
-  const collection = await prisma.listingCollection.create({ data: { portalId: portal.id, slug: 'demo-communities', name: SEGMENT_NAME, predicate: {} } });
+  const collection = await prisma.listingCollection.create({ data: { portalId: portal.id, slug: 'demo-communities', name: SEGMENT_NAME, predicate: {}, isPublished: true } });
   console.log(`Created listing collection "${SEGMENT_NAME}" (${collection.id}) for portal ${portal.slug}`);
 
   let created = 0;

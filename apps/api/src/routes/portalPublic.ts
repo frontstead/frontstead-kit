@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
-import { Prisma, prisma } from 'db';
+import { ListingSource, Prisma, prisma } from 'db';
 import { validateSlug } from '../services/agentPortalsService.js';
 import { createInquiry, InquiryInputError } from '../services/inquiryService.js';
 import { getPublicPortalConfig, getPublicPortalListingPolicy } from '../services/portalConfigService.js';
@@ -196,13 +196,16 @@ async function publicLanding(req, res, next, kind: 'area' | 'collection') {
     if (!metadata) return res.status(404).json({ error: `${kind === 'area' ? 'Area' : 'Collection'} not found` });
     const readiness = await getPortalReadiness(portal); if (!readiness.canShowListings) return res.json({ metadata, properties: [], readiness, gated: true });
     const predicate = kind === 'area' ? { areaSlugs: [metadata.slug] } : (metadata as unknown as { predicate: Prisma.JsonValue }).predicate;
+    // IDX approval covers MLS listings only; see portalReadinessService.
+    const { idxApproved } = getPortalConfig().compliance;
     const listingWhere = buildPublicListingWhere({
       ...(getPortalConfig().listings.boardIds.length ? { mlsBoardId: { in: getPortalConfig().listings.boardIds } } : {}),
+      ...(idxApproved ? {} : { source: { not: ListingSource.MLS } }),
     });
-    const compiledWhere = compileCollectionPredicate(predicate, { accountId: portal.accountId, portalId: portal.id, boardIds: getPortalConfig().listings.boardIds, publicVisibility: true, ...(kind === 'collection' ? { collectionId: metadata.id } : {}) });
+    const compiledWhere = compileCollectionPredicate(predicate, { accountId: portal.accountId, portalId: portal.id, boardIds: getPortalConfig().listings.boardIds, publicVisibility: true, ...(idxApproved ? {} : { excludeMls: true }), ...(kind === 'collection' ? { collectionId: metadata.id } : {}) });
     const where: Prisma.PropertyWhereInput = { AND: [compiledWhere, { listings: { some: listingWhere } }] };
     const properties = await prisma.property.findMany({ where, take: 24, include: { listings: { where: listingWhere, orderBy: { listDate: 'desc' }, take: 1 }, media: { orderBy: { order: 'asc' }, take: 1 } } });
-    res.json({ metadata, readiness, gated: false, properties: properties.map((p) => ({ id: p.id, address: p.address, city: p.city, state: p.state, zipCode: p.zipCode, bedrooms: p.bedrooms, bathrooms: p.bathrooms, squareFeet: p.squareFeet, price: p.listings[0]?.listPrice == null ? null : Number(p.listings[0].listPrice), imageUrl: p.listings[0]?.imageUrl ?? (isMlsPublicDisplayEnabled() ? p.media[0]?.url ?? null : null), slug: p.listings[0]?.slug ?? null, listingId: p.listings[0]?.id ?? null, subdivision: p.subdivision, status: p.listings[0]?.status ?? null })) });
+    res.json({ metadata, readiness, gated: false, properties: properties.map((p) => ({ id: p.id, address: p.address, city: p.city, state: p.state, zipCode: p.zipCode, bedrooms: p.bedrooms, bathrooms: p.bathrooms, squareFeet: p.squareFeet, price: p.listings[0]?.listPrice == null ? null : Number(p.listings[0].listPrice), imageUrl: p.listings[0]?.imageUrl ?? (idxApproved && isMlsPublicDisplayEnabled() ? p.media[0]?.url ?? null : null), slug: p.listings[0]?.slug ?? null, listingId: p.listings[0]?.id ?? null, subdivision: p.subdivision, status: p.listings[0]?.status ?? null })) });
   } catch (e) { next(e); }
 }
 router.get('/slug/:slug/areas/:itemSlug', listingsLimiter, (req, res, next) => publicLanding(req, res, next, 'area'));

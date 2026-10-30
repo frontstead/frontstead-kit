@@ -22,8 +22,15 @@ Typesense filters and scoped keys, property details, media, suggestions,
 collections, featured listings, and portal readiness. The worker applies it to
 media processing and property-document reconciliation.
 
-Existing `Property.media` rows do not carry listing provenance. While MLS display
-is disabled, public responses suppress shared property media conservatively;
+The portal config's `compliance.idxApproved` is a second gate, and it covers
+MLS listings only. Until it is `true`, a portal in `db` listing mode shows only
+listings that did not come from an MLS (for example, an agent's own listings
+entered by hand), and readiness reports IDX approval as a warning rather than a
+blocker. MLS listings show publicly only when `idxApproved` is `true` and
+`MLS_PUBLIC_DISPLAY_ENABLED=true`.
+
+Existing `Property.media` rows do not carry listing provenance. While either gate
+is closed, public responses suppress shared property media conservatively;
 eligible non-MLS `Listing.imageUrl` values remain available.
 
 Changing the environment flag does not rewrite documents already stored in
