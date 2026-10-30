@@ -2,6 +2,11 @@
 
 All notable public changes to Frontstead Kit are documented here.
 
+## [0.12.0.11] - 2026-10-30
+
+### Security
+- Demo seeds no longer create accounts with fixed passwords. The passwords (`admin123`, `agent123` and others) were published in this repository, so they signed anyone in to any deployment that had been seeded, including as an administrator. Each run now generates one password for the accounts it creates and prints it once; set `DEMO_SEED_PASSWORD` (at least 12 characters) to choose it instead. Deployments seeded before this change still have the old passwords until they are reseeded or the passwords are changed.
+
 ## [0.12.0.10] - 2026-10-30
 
 ### Changed

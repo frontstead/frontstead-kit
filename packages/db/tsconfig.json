@@ -16,6 +16,8 @@
     "scripts/seedGuard.ts",
     "scripts/guardDemoSeed.ts",
     "scripts/seedGuard.test.ts",
+    "scripts/seedPassword.ts",
+    "scripts/seedPassword.test.ts",
     "generated/prisma/**/*.ts"
   ],
   "exclude": [

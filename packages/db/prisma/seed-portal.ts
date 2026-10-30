@@ -2,6 +2,7 @@ import '../scripts/loadEnv.js';
 import bcrypt from 'bcrypt';
 import { prisma } from '../index.js';
 import { requireDemoSeedOptIn } from '../scripts/seedGuard.js';
+import { describeDemoSeedPassword, resolveDemoSeedPassword } from '../scripts/seedPassword.js';
 
 // Idempotent: can be re-run against dev or prod.
 // Creates the "ABC Realty" Account + owner User + Portal row that the
@@ -10,7 +11,6 @@ import { requireDemoSeedOptIn } from '../scripts/seedGuard.js';
 
 const SLUG = 'abc-realty';
 const EMAIL = 'owner@example.com';
-const TEMP_PASSWORD = 'portal-change-me-before-use';
 
 async function main() {
   requireDemoSeedOptIn();
@@ -34,7 +34,8 @@ async function main() {
   // ── Owner user ───────────────────────────────────────────────────────────────
   let user = await prisma.user.findFirst({ where: { email: EMAIL } });
   if (!user) {
-    const hashedPassword = await bcrypt.hash(TEMP_PASSWORD, 12);
+    const seedPassword = resolveDemoSeedPassword();
+    const hashedPassword = await bcrypt.hash(seedPassword.password, 12);
     user = await prisma.user.create({
       data: {
         email: EMAIL,
@@ -47,7 +48,7 @@ async function main() {
       },
     });
     console.log(`👤 Created user: ${user.email}`);
-    console.log(`🔑 Temp password: ${TEMP_PASSWORD}  ← change this in prod`);
+    console.log(`🔑 Password: ${describeDemoSeedPassword(seedPassword)}`);
   } else {
     console.log(`👤 Reusing user: ${user.email}`);
   }

@@ -778,7 +778,7 @@ async function main() {
   console.log(`   ✅ ${totalTaskCount} tasks across transactions and contacts`);
   console.log(`   🤖 ${actionQueueCount} action queue items (PENDING)`);
   console.log('\n🔑 Agent login:');
-  console.log(`   ${agent.email} / agent123`);
+  console.log(`   ${agent.email} (password printed by the seed that created this user)`);
 }
 
 main()

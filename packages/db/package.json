@@ -26,7 +26,7 @@
   },
   "scripts": {
     "typecheck": "tsc --project tsconfig.json --pretty false",
-    "test:seed-guard": "node --import tsx --test scripts/seedGuard.test.ts",
+    "test:seed-guard": "node --import tsx --test scripts/seedGuard.test.ts scripts/seedPassword.test.ts",
     "prisma": "prisma",
     "seed:demo:reset": "node --import tsx prisma/seed.ts",
     "seed:1000": "node --import tsx prisma/seed-1000.ts",
