@@ -45,7 +45,8 @@ Demo seeds are explicit development operations. Every demo or destructive seed:
 
 - requires `DATABASE_URL`;
 - refuses to run when `NODE_ENV=production`;
-- requires `CONFIRM_DEMO_SEED` to equal the exact URL host and database target; and
+- requires `CONFIRM_DEMO_SEED` to equal the exact URL host and database target;
+- gives the accounts it creates a password generated for that run and printed once, or the value of `DEMO_SEED_PASSWORD` (at least 12 characters) when set, never a fixed password; and
 - must never be placed in a production start command or production service environment.
 
 For this example URL:

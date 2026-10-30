@@ -57,4 +57,4 @@ npm run db:demo:reset-and-seed
 
 **Warning:** reset commands delete or replace data. Verify `DATABASE_URL` independently and confirm the target printed by the guard before proceeding. Never set `CONFIRM_DEMO_SEED` in production or add a seed command to application startup.
 
-Demo accounts and credentials are local-only. Seed commands report what they create; do not reuse those credentials in any deployed environment.
+Demo accounts and credentials are local-only. Seeds never use a fixed password: each run generates one for the accounts it creates and prints it once. To keep the same password across reseeds while developing, set `DEMO_SEED_PASSWORD` (at least 12 characters); the seed then uses it and does not print it. Do not reuse seeded credentials in any deployed environment.

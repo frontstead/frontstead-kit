@@ -3,6 +3,7 @@ import { prisma } from '../index.js';
 import { faker } from '@faker-js/faker';
 import bcrypt from 'bcrypt';
 import { requireDemoSeedOptIn } from '../scripts/seedGuard.js';
+import { describeDemoSeedPassword, resolveDemoSeedPassword } from '../scripts/seedPassword.js';
 
 /**
  * Generates an SEO-friendly URL slug from property address info
@@ -555,12 +556,14 @@ async function createAgentWorkbenchDemo(tx, accountId: string, userEmail: string
 
 async function seedData() {
 
-    // Create a few sample users
+    // Create a few sample users, all with one password (see seedPassword.ts).
     console.log('👤 Creating sample users...');
+    const seedPassword = resolveDemoSeedPassword();
+    const passwordHash = await bcrypt.hash(seedPassword.password, 12);
     const sampleUsers = [
       {
         email: "john.doe@example.com",
-        password: await bcrypt.hash("password123", 12),
+        password: passwordHash,
         firstName: "John",
         lastName: "Doe",
         phoneNumber: "+1-555-0123",
@@ -570,7 +573,7 @@ async function seedData() {
       },
       {
         email: "jane.agent@frontstead.com",
-        password: await bcrypt.hash("agent123", 12),
+        password: passwordHash,
         firstName: "Jane",
         lastName: "Smith",
         phoneNumber: "+1-555-0456",
@@ -580,7 +583,7 @@ async function seedData() {
       },
       {
         email: "admin@frontstead.com",
-        password: await bcrypt.hash("admin123", 12),
+        password: passwordHash,
         firstName: "Admin",
         lastName: "User",
         phoneNumber: "+1-555-0999",
@@ -683,9 +686,10 @@ async function seedData() {
     });
 
     console.log('\n🔑 TEST ACCOUNTS:');
-    console.log('   • john.doe@example.com (password: password123) - USER');
-    console.log('   • jane.agent@frontstead.com (password: agent123) - AGENT');
-    console.log('   • admin@frontstead.com (password: admin123) - ADMIN');
+    console.log('   • john.doe@example.com - USER');
+    console.log('   • jane.agent@frontstead.com - AGENT');
+    console.log('   • admin@frontstead.com - ADMIN');
+    console.log(`   Password for all three: ${describeDemoSeedPassword(seedPassword)}`);
 
     console.log('\n💰 PRICE RANGES:');
     console.log('   • $275K - $3M across all neighborhoods');

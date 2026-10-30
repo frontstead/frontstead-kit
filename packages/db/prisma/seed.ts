@@ -2,6 +2,7 @@ import '../scripts/loadEnv.js';
 import { prisma } from '../index.js';
 import bcrypt from 'bcrypt';
 import { requireDemoSeedOptIn } from '../scripts/seedGuard.js';
+import { describeDemoSeedPassword, resolveDemoSeedPassword } from '../scripts/seedPassword.js';
 
 /**
  * Generates an SEO-friendly URL slug from property address info
@@ -817,11 +818,10 @@ const charlotteMedia = [
   { propertyMlsId: "CLT020", url: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800", caption: "Large deck and backyard", order: 3 }
 ];
 
-// Sample users with hashed passwords
+// Sample users. They all get one password at seed time (see seedPassword.ts).
 const sampleUsers = [
   {
     email: "john.doe@example.com",
-    password: "password123", // Will be hashed
     firstName: "John",
     lastName: "Doe",
     phoneNumber: "+1-555-0123",
@@ -831,7 +831,6 @@ const sampleUsers = [
   },
   {
     email: "jane.smith@frontstead.com",
-    password: "agent123", // Will be hashed
     firstName: "Jane",
     lastName: "Smith",
     phoneNumber: "+1-555-0456",
@@ -841,7 +840,6 @@ const sampleUsers = [
   },
   {
     email: "sarah.johnson@frontstead.com",
-    password: "agent456", // Will be hashed
     firstName: "Sarah",
     lastName: "Johnson",
     phoneNumber: "+1-555-0789",
@@ -851,7 +849,6 @@ const sampleUsers = [
   },
   {
     email: "admin@frontstead.com",
-    password: "admin123", // Will be hashed
     firstName: "Admin",
     lastName: "User",
     phoneNumber: "+1-555-0999",
@@ -861,7 +858,6 @@ const sampleUsers = [
   },
   {
     email: "emily.rodriguez@example.com",
-    password: "user123", // Will be hashed
     firstName: "Emily",
     lastName: "Rodriguez",
     phoneNumber: "+1-555-0321",
@@ -940,8 +936,9 @@ async function main() {
   // belong to an Account (billing migration). Match the pattern used in
   // apps/api/src/routes/auth.ts register-agent: tx creates Account → User →
   // AccountMember. plan='free' so seeded accounts bypass billing gates.
+  const seedPassword = resolveDemoSeedPassword();
+  const hashedPassword = await bcrypt.hash(seedPassword.password, 12);
   for (const userData of sampleUsers) {
-    const hashedPassword = await bcrypt.hash(userData.password, 12);
     await prisma.$transaction(async (tx) => {
       const account = await tx.account.create({
         data: {
@@ -1101,13 +1098,14 @@ async function main() {
   console.log('✅ Charlotte seed completed successfully!');
   console.log('\n📋 Test accounts created:');
   console.log('👤 Users:');
-  console.log('   - john.doe@example.com (password: password123)');
-  console.log('   - emily.rodriguez@example.com (password: user123)');
+  console.log('   - john.doe@example.com');
+  console.log('   - emily.rodriguez@example.com');
   console.log('🏢 Agents:');
-  console.log('   - jane.smith@frontstead.com (password: agent123)');
-  console.log('   - sarah.johnson@frontstead.com (password: agent456)');
+  console.log('   - jane.smith@frontstead.com');
+  console.log('   - sarah.johnson@frontstead.com');
   console.log('⚡ Admin:');
-  console.log('   - admin@frontstead.com (password: admin123)');
+  console.log('   - admin@frontstead.com');
+  console.log(`🔑 Password for every account: ${describeDemoSeedPassword(seedPassword)}`);
   console.log('\n🏠 Charlotte Properties:');
   console.log('   - 20 properties across Charlotte metro neighborhoods');
   console.log('   - Uptown, Dilworth, Myers Park, South End, NoDa, Plaza Midwood');
