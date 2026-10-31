@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { resolveServerApiBaseUrl } from "@frontstead/api-client";
 import { buildProxyHeaders } from "@/lib/proxy-headers";
 import { TOKEN_COOKIE_NAME } from "@/lib/auth";
-import { PORTAL_SLUG } from "@/lib/portal";
+import { getPortalSlug } from "@/lib/portal";
 
 const API_BASE = resolveServerApiBaseUrl(process.env);
 
@@ -47,9 +47,16 @@ async function proxy(request: NextRequest, params: { path?: string[] }) {
   const pathWithApi = path.startsWith("api/") ? path : `api/${path}`;
   const url = new URL(pathWithApi + request.nextUrl.search, API_BASE);
 
+  let slug: string;
+  try {
+    slug = await getPortalSlug();
+  } catch {
+    return NextResponse.json({ error: "Service unavailable" }, { status: 503 });
+  }
+
   const headers = buildProxyHeaders(request.headers, {
     Authorization: `Bearer ${token}`,
-    "X-Portal-Slug": PORTAL_SLUG,
+    "X-Portal-Slug": slug,
   });
 
   let body: string | undefined;

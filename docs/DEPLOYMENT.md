@@ -122,7 +122,7 @@ Run migrations as an explicit pre-deploy or release step, with the same `DATABAS
 npm run db:migrate
 ```
 
-The command runs `prisma migrate deploy`. It must complete before `npm run start:api`; API startup and the API Docker image do not apply migrations automatically.
+The command runs `prisma migrate deploy` and then creates this deployment's portal from `portal.config.ts` if it doesn't exist yet; see [Going Live](./COMPOSE.md#going-live). It must complete before `npm run start:api`; API startup and the API Docker image do not apply migrations automatically.
 
 Do not auto-seed production. Demo seed commands are disabled under `NODE_ENV=production` and require `CONFIRM_DEMO_SEED` for an exact non-production database target. See [DATABASE.md](./DATABASE.md).
 
@@ -165,6 +165,7 @@ When deploying a compatible external Agent API client, set `AGENT_API_ENABLED=tr
 - [ ] Portal domain points to `apps/portal`.
 - [ ] API and portal use HTTPS URLs and matching CORS origins.
 - [ ] PostgreSQL is attached and migrations complete successfully.
+- [ ] The migrate log ends with `✓ Portal <slug> ready`, and the portal's `GET /api/health` returns 200.
 - [ ] `JWT_SECRET` is unique and stored as a secret.
 - [ ] `AGENT_API_ENABLED=false` unless a compatible external Agent API client is intentionally deployed.
 - [ ] API and MLS worker use the same `MLS_PUBLIC_DISPLAY_ENABLED` value.

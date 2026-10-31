@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getPortalListings, getPortalProperty } from "./listings";
+vi.mock("@/lib/portal", () => ({ getPortalSlug: async () => "abc-realty", reportPortalUnavailable: vi.fn() }));
 
 describe("getPortalListings", () => {
   let fetchMock: ReturnType<typeof vi.fn>;

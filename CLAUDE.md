@@ -24,7 +24,7 @@ Never pnpm or yarn. All commands run from the repo root unless noted.
 
 ```bash
 npm install
-npm run db:migrate                                # prisma migrate deploy
+npm run db:migrate                                # prisma migrate deploy + ensure the portal row
 npm run dev                                       # API :3001 + portal :3006 (concurrently)
 npm run dev:api                                   # API only
 npm run dev --workspace=@frontstead/mls-service   # MLS worker, separate process
@@ -172,8 +172,11 @@ reclassification scheduler; config changes need an explicit resumable run —
   `db:demo:reset:1000`, `db:demo:reset:agent`, `db:demo:reset-and-seed`, `db:seed:1000`,
   `db:seed:portal` (portal demo provisioning), and `db:seed:demo-listings` (optional portal
   listings). Never add automatic production seeding, fixed credentials, or a deployed
-  `CONFIRM_DEMO_SEED` service variable. `packages/db/scripts/seedGuard.test.ts` is a CI gate —
-  keep it passing.
+  `CONFIRM_DEMO_SEED` service variable. The one production write besides migrations is
+  `packages/db/scripts/ensurePortal.ts`, run by `db:migrate`: it creates this deployment's
+  Account + Portal from `portal.config.ts` when missing, is create-only, and never creates
+  users, passwords, listings or demo data. Keep it that narrow.
+  `packages/db/scripts/seedGuard.test.ts` is a CI gate — keep it passing.
 - Never commit customer data, MLS credentials, or secrets, including in fixtures and tests.
 
 ## Documentation

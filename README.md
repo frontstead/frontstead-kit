@@ -32,7 +32,7 @@ npm run dev
 - Portal: <http://localhost:3006>
 - API: <http://localhost:3001>
 
-An empty database is valid. To add local demo data, opt in to the exact database target first. The confirmation is the URL host and database name, without credentials:
+`db:migrate` also creates your portal from `packages/portal-config/src/portal.config.ts` (the stock `abc-realty` until you change it), so the portal works on an empty database. To add local demo data, opt in to the exact database target first. The confirmation is the URL host and database name, without credentials:
 
 ```bash
 export CONFIRM_DEMO_SEED='localhost:5432/frontstead_dev?schema=public'

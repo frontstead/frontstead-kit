@@ -130,20 +130,36 @@ router.get('/slug/:slug/available', async (req, res, next) => {
 // from "doesn't exist" / "never launched" — it returns a minimal, generic
 // { suspended: true } payload (no agent/brokerage info) rather than 404, so
 // The portal can render a soft-land page instead of a bare not-found.
-router.get('/slug/:slug', async (req, res, next) => {
+async function sendPublicPortal(slug: string, res, next, { includeSlugWhenSuspended = false } = {}) {
   try {
     const portal = await prisma.portal.findUnique({
-      where: { slug: req.params.slug },
+      where: { slug },
       select: { ...buildPublicFields(), suspendedAt: true },
     });
     if (!portal) return res.status(404).json({ error: 'Portal not found' });
-    if (portal.suspendedAt) return res.json({ suspended: true });
+    if (portal.suspendedAt) return res.json(includeSlugWhenSuspended ? { suspended: true, slug } : { suspended: true });
     if (!portal.isActive) return res.status(404).json({ error: 'Portal not found' });
     const { suspendedAt: _suspendedAt, ...publicPortal } = portal;
     res.json(publicPortal);
   } catch (err) {
     next(err);
   }
+}
+
+router.get('/slug/:slug', (req, res, next) => sendPublicPortal(req.params.slug, res, next));
+
+// GET /current — this deployment's portal: the one whose slug is compiled in
+// from packages/portal-config/src/portal.config.ts. The portal app asks for its
+// slug here, so the config is the only place the slug is set. Same responses
+// as /slug/:slug; a suspended portal also carries its slug.
+router.get('/current', (req, res, next) => {
+  let slug: string;
+  try {
+    slug = getPortalConfig().slug;
+  } catch (err) {
+    return handlePortalConfigError(err, res, next);
+  }
+  return sendPublicPortal(slug, res, next, { includeSlugWhenSuspended: true });
 });
 
 // GET /slug/:slug/readiness — public-safe resolved listing/search readiness.

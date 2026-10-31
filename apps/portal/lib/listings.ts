@@ -1,5 +1,5 @@
 import { resolveServerApiBaseUrl } from "@frontstead/api-client";
-import { PORTAL_SLUG } from "@/lib/portal";
+import { getPortalSlug, reportPortalUnavailable } from "@/lib/portal";
 
 const API_BASE = resolveServerApiBaseUrl(process.env);
 
@@ -113,9 +113,11 @@ export async function getPortalListings(params: PortalListingsParams = {}): Prom
   if (params.page) query.set("page", String(params.page));
 
   try {
-    const res = await fetch(`${API_BASE}/api/portals/slug/${PORTAL_SLUG}/listings?${query.toString()}`, {
+    const slug = await getPortalSlug();
+    const res = await fetch(`${API_BASE}/api/portals/slug/${slug}/listings?${query.toString()}`, {
       cache: "no-store",
     });
+    if (res.status === 404) reportPortalUnavailable(`the API returned 404 for portal '${slug}'`);
     if (!res.ok) return EMPTY_RESULT;
     return (await res.json()) as PortalListingsResult;
   } catch {
@@ -126,7 +128,7 @@ export async function getPortalListings(params: PortalListingsParams = {}): Prom
 export async function getPortalProperty(identifier: string): Promise<PortalPropertyDetail | null> {
   try {
     const res = await fetch(
-      `${API_BASE}/api/portals/slug/${PORTAL_SLUG}/properties/${encodeURIComponent(identifier)}`,
+      `${API_BASE}/api/portals/slug/${await getPortalSlug()}/properties/${encodeURIComponent(identifier)}`,
       { cache: "no-store" },
     );
     if (!res.ok) return null;

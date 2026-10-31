@@ -72,6 +72,35 @@ const ACTIVE_PORTAL = {
   isActive: true,
 };
 
+describe('GET /current', () => {
+  beforeEach(() => { vi.clearAllMocks(); });
+
+  it("looks up the slug compiled in from portal.config.ts", async () => {
+    const { getPortalConfig } = await import('@frontstead/portal-config');
+    mockPrisma.portal.findUnique.mockResolvedValue({ ...ACTIVE_PORTAL, slug: getPortalConfig().slug, suspendedAt: null });
+    const res = await request(buildApp()).get('/current');
+    expect(res.status).toBe(200);
+    expect(mockPrisma.portal.findUnique.mock.calls[0][0].where).toEqual({ slug: getPortalConfig().slug });
+    expect(res.body.slug).toBe(getPortalConfig().slug);
+    expect(res.body).not.toHaveProperty('suspendedAt');
+  });
+
+  it('returns 404 when the portal is missing or inactive', async () => {
+    mockPrisma.portal.findUnique.mockResolvedValueOnce(null);
+    expect((await request(buildApp()).get('/current')).status).toBe(404);
+    mockPrisma.portal.findUnique.mockResolvedValueOnce({ ...ACTIVE_PORTAL, isActive: false, suspendedAt: null });
+    expect((await request(buildApp()).get('/current')).status).toBe(404);
+  });
+
+  it('includes the slug in the suspended payload so the portal can still resolve it', async () => {
+    const { getPortalConfig } = await import('@frontstead/portal-config');
+    mockPrisma.portal.findUnique.mockResolvedValue({ ...ACTIVE_PORTAL, suspendedAt: new Date('2026-07-01') });
+    const res = await request(buildApp()).get('/current');
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ suspended: true, slug: getPortalConfig().slug });
+  });
+});
+
 describe('GET /slug/:slug', () => {
   beforeEach(() => { vi.clearAllMocks(); delete process.env.MLS_PUBLIC_DISPLAY_ENABLED; });
   afterAll(() => { if (originalMlsDisplay === undefined) delete process.env.MLS_PUBLIC_DISPLAY_ENABLED; else process.env.MLS_PUBLIC_DISPLAY_ENABLED = originalMlsDisplay; });

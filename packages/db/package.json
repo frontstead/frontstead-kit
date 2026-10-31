@@ -7,7 +7,8 @@
   "type": "module",
   "exports": {
     ".": "./index.ts",
-    "./classification": "./classification.ts"
+    "./classification": "./classification.ts",
+    "./ensurePortal": "./scripts/ensurePortal.ts"
   },
   "prisma": {
     "schema": "./prisma/schema.prisma"
@@ -26,7 +27,7 @@
   },
   "scripts": {
     "typecheck": "tsc --project tsconfig.json --pretty false",
-    "test:seed-guard": "node --import tsx --test scripts/seedGuard.test.ts scripts/seedPassword.test.ts",
+    "test:seed-guard": "node --import tsx --test scripts/seedGuard.test.ts scripts/seedPassword.test.ts scripts/ensurePortal.test.ts",
     "prisma": "prisma",
     "seed:demo:reset": "node --import tsx prisma/seed.ts",
     "seed:1000": "node --import tsx prisma/seed-1000.ts",
@@ -36,7 +37,8 @@
     "seed:demo-listings": "node --import tsx prisma/seed-demo-listings.ts",
     "generate": "prisma generate",
     "build": "prisma generate",
-    "db:migrate": "prisma migrate deploy",
+    "db:migrate": "prisma migrate deploy && node --import tsx scripts/ensurePortal.ts",
+    "portal:ensure": "node --import tsx scripts/ensurePortal.ts",
     "db:reset:destructive": "node --import tsx scripts/guardDemoSeed.ts && prisma migrate reset --force",
     "classify": "node --import tsx scripts/classify.ts"
   }
