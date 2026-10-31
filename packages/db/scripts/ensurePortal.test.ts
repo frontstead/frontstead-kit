@@ -78,7 +78,7 @@ describe('ensurePortal', () => {
 describe('primaryDomain', () => {
   it('skips localhost names', () => {
     assert.equal(primaryDomain(['abc-realty.localhost', 'localhost']), null);
-    assert.equal(primaryDomain(['localhost', 'carolinagolfhomes.com']), 'carolinagolfhomes.com');
+    assert.equal(primaryDomain(['localhost', 'jonesrealty.example']), 'jonesrealty.example');
   });
 });
 
