@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+vi.mock("@/lib/portal", () => ({ getPortalSlug: async () => "abc-realty", reportPortalUnavailable: vi.fn() }));
 
 const { headers } = vi.hoisted(() => ({ headers: vi.fn() }));
 vi.mock("next/headers", () => ({ headers }));

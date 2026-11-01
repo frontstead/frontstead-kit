@@ -20,7 +20,7 @@ npx prisma migrate status --config=packages/db/prisma.config.ts
 npx prisma migrate dev --config=packages/db/prisma.config.ts --name <migration-name>
 ```
 
-API startup does not apply migrations. Run `npm run db:migrate` explicitly during deployment before starting the API.
+API startup does not apply migrations. Run `npm run db:migrate` explicitly during deployment before starting the API. After migrating, it creates this deployment's portal from `portal.config.ts` if it doesn't exist yet. That step is create-only and makes no users (`scripts/ensurePortal.ts`; run it alone with `npm run portal:ensure --workspace=db`).
 
 ## Guarded Demo Seeds
 

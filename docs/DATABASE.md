@@ -27,7 +27,9 @@ npm run db:migrate
 npm run build --workspace=db
 ```
 
-`db:migrate` runs `prisma migrate deploy` and applies committed migrations. It does not create a migration. API startup does not run this command, so run it explicitly before starting a newly deployed API version.
+`db:migrate` runs `prisma migrate deploy`, which applies committed migrations, then ensures this deployment's portal exists (`packages/db/scripts/ensurePortal.ts`; `npm run portal:ensure --workspace=db` runs that step alone). It does not create a migration. API startup does not run this command, so run it explicitly before starting a newly deployed API version.
+
+Ensuring the portal creates one Account and one active Portal from `packages/portal-config/src/portal.config.ts` when no portal with that slug exists. It only ever creates; an existing portal is never changed. If the database already holds portals with other slugs, it warns and creates nothing. It never creates users, passwords, listings or demo data. That is why it can run in production, while the demo seeds can't. See [COMPOSE.md](./COMPOSE.md#going-live).
 
 To author a migration against a disposable development database:
 
@@ -88,7 +90,7 @@ npm run db:migrate
 npm run start:api
 ```
 
-Neither `npm run start:api` nor the API Docker image applies migrations. Demo seeds do not run automatically and must not be added to production startup.
+Neither `npm run start:api` nor the API Docker image applies migrations. Demo seeds do not run automatically and must not be added to production startup; the only production write besides migrations is the create-only portal step described above.
 
 On Railway, the API typically receives an internal `DATABASE_URL` from the PostgreSQL service. That hostname only resolves inside Railway. For a workstation operation, temporarily supply the PostgreSQL service's public URL as `DATABASE_URL`, then run the migration command. Treat both URLs as secrets and avoid shell history, logs, and committed files.
 

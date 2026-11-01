@@ -4,10 +4,11 @@ import { prisma } from '../index.js';
 import { requireDemoSeedOptIn } from '../scripts/seedGuard.js';
 import { describeDemoSeedPassword, resolveDemoSeedPassword } from '../scripts/seedPassword.js';
 
-// Idempotent: can be re-run against dev or prod.
-// Creates the "ABC Realty" Account + owner User + Portal row that the
-// apps/portal template (lib/portal.ts's PORTAL_SLUG) expects to find.
-// Self-hosters: copy this file, change SLUG/EMAIL/names to your own.
+// Demo only (guarded; refuses production). Idempotent.
+// Creates the "ABC Realty" Account + a demo owner User + the Portal row, for
+// local evaluation with a login. Production portals don't need this: the
+// `db:migrate` step creates the deployment's portal from portal.config.ts with
+// no users (scripts/ensurePortal.ts, docs/COMPOSE.md#going-live).
 
 const SLUG = 'abc-realty';
 const EMAIL = 'owner@example.com';

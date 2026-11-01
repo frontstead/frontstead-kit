@@ -4,13 +4,13 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { OwnerLeadsInbox, type LeadsResponse } from "@/components/owner-leads-inbox";
 import { getToken } from "@/lib/auth";
-import { PORTAL_SLUG } from "@/lib/portal";
+import { getPortalSlug } from "@/lib/portal";
 
 const API_BASE = resolveServerApiBaseUrl(process.env);
 
 async function authorizeAndLoad(token: string): Promise<LeadsResponse | null> {
   try {
-    const response = await fetch(`${API_BASE}/api/owner/leads?portalSlug=${encodeURIComponent(PORTAL_SLUG)}&limit=25`, {
+    const response = await fetch(`${API_BASE}/api/owner/leads?portalSlug=${encodeURIComponent(await getPortalSlug())}&limit=25`, {
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
     });

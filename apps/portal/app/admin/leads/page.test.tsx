@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+vi.mock("@/lib/portal", () => ({ getPortalSlug: async () => "abc-realty", reportPortalUnavailable: vi.fn() }));
 
 const redirect = vi.hoisted(() => vi.fn((path: string) => { throw new Error(`REDIRECT:${path}`); }));
 const getToken = vi.hoisted(() => vi.fn());

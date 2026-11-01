@@ -2,6 +2,22 @@
 
 All notable public changes to Frontstead Kit are documented here.
 
+## [0.12.0.12] - 2026-10-31
+
+### Added
+- **The deployment's portal now sets itself up on `db:migrate`.** After applying migrations, `db:migrate` creates the Account and Portal from `packages/portal-config/src/portal.config.ts` if no portal with that slug exists, and prints one line saying whether the portal is ready. It only ever creates: an existing portal is never changed, so dashboard edits survive redeploys. It never creates users, passwords or demo data. If the database holds portals with other slugs, it warns and creates nothing. Run the step alone with `npm run portal:ensure --workspace=db`.
+- `GET /api/portals/current` returns this deployment's portal, the one compiled in from `portal.config.ts`.
+- The portal has a `GET /api/health` route. It returns 200 when the API serves this deployment's portal (including a suspended one), and otherwise 503 with the reason and the fix. `compose.yaml` uses it as the portal healthcheck, so a deploy fails instead of serving an empty site.
+- `docs/COMPOSE.md` has a Going Live section: one config file, deploy, and what each message means.
+
+### Changed
+- The portal reads its slug from the API (`GET /api/portals/current`) instead of the `PORTAL_SLUG` constant in `apps/portal/lib/portal.ts`, so `portal.config.ts` is the only place the slug is set. When the API has no portal for it, the portal logs why once instead of silently rendering empty listings.
+
+### Upgrading
+- If you edited `PORTAL_SLUG` in `apps/portal/lib/portal.ts`, put that slug in `portal.config.ts` instead. The constant is gone.
+- If you copied `seed-portal.ts` to create your production portal, delete the copy: `db:migrate` creates the portal now, without a seeded login. Your existing portal is left as it is, as long as its slug matches `portal.config.ts`.
+- If your portal container's healthcheck still requests `/`, switch it to `/api/health` so a missing portal fails the deploy.
+
 ## [0.12.0.11] - 2026-10-30
 
 ### Security

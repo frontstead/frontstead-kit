@@ -4,7 +4,7 @@ import { headers } from "next/headers";
 import { z } from "zod";
 import { resolveServerApiBaseUrl } from "@frontstead/api-client";
 import { buildProxyHeaders } from "@/lib/proxy-headers";
-import { PORTAL_SLUG } from "@/lib/portal";
+import { getPortalSlug } from "@/lib/portal";
 
 const InquirySchema = z.object({
   name: z.string().min(1, "Name is required").max(120),
@@ -47,9 +47,9 @@ export async function submitInquiry(
     .join("\n\n") || "Interested in golf communities.";
 
   const apiBase = resolveServerApiBaseUrl(process.env);
-  const url = `${apiBase}/api/portals/${PORTAL_SLUG}/inquiries`;
 
   try {
+    const url = `${apiBase}/api/portals/${await getPortalSlug()}/inquiries`;
     // Forward the visitor's real IP — without it, the API's per-IP inquiry
     // rate limit sees every visitor as this server's own container IP and
     // collapses into one shared bucket for the whole portal.

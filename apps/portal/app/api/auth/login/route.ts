@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { resolveServerApiBaseUrl } from "@frontstead/api-client";
 import { buildProxyHeaders } from "@/lib/proxy-headers";
 import { establishSessionResponse } from "@/lib/establish-session";
-import { PORTAL_SLUG } from "@/lib/portal";
+import { getPortalSlug } from "@/lib/portal";
 
 const API_BASE = resolveServerApiBaseUrl(process.env);
 
@@ -19,7 +19,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid body" }, { status: 400 });
   }
 
-  const res = await fetch(`${API_BASE}/api/portals/${PORTAL_SLUG}/auth/login`, {
+  let slug: string;
+  try {
+    slug = await getPortalSlug();
+  } catch {
+    return NextResponse.json({ error: "Sign-in is unavailable right now. Please try again shortly." }, { status: 503 });
+  }
+
+  const res = await fetch(`${API_BASE}/api/portals/${slug}/auth/login`, {
     method: "POST",
     headers: buildProxyHeaders(request.headers),
     body,

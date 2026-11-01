@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
+vi.mock("@/lib/portal", () => ({ getPortalSlug: async () => "abc-realty", reportPortalUnavailable: vi.fn() }));
 
 const { cookies, cookieSet } = vi.hoisted(() => ({
   cookies: vi.fn(),
