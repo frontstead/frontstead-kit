@@ -2,6 +2,15 @@
 
 All notable public changes to Frontstead Kit are documented here.
 
+## [0.12.0.13] - 2026-11-02
+
+### Security
+- **Next.js 16.4.4** (from 16.3.8), fixing GHSA-2464-fhr4-w9xw (critical: remote code execution in the Image Optimization API through `sharp` on glibc Linux), GHSA-673q-mjm6-r5xr (critical: remote code execution in `use cache` functions returning typed arrays) and GHSA-p3m5-59mp-jv5r (high: CPU denial of service through Server Actions). The portal uses Server Actions, so the last one applies to every deployment.
+- The root `sharp` pin and override move to 0.35.5, the first fixed release. The old pin kept the fixed `sharp` out even after a Next.js upgrade.
+
+### Upgrading
+- Rebuild and redeploy the portal image. If your fork pins `sharp` or `next` itself, raise both pins.
+
 ## [0.12.0.12] - 2026-10-31
 
 ### Added
