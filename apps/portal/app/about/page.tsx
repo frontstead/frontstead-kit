@@ -13,6 +13,7 @@ export const metadata: Metadata = {
 
 export default async function AboutPage() {
   const brand = await getPortalBrand();
+  const mlsSource = brand.mlsBoards.length ? brand.mlsBoards.join(", ") : "the region\u2019s multiple listing service";
   return (
     <>
       <SiteHeader />
@@ -30,8 +31,8 @@ export default async function AboutPage() {
             neighborhoods across the region.
           </p>
           <p className="mt-4 leading-relaxed text-muted-foreground">
-            Listings are drawn from your MLS board, the region&rsquo;s multiple listing
-            service. We&rsquo;re finishing our MLS onboarding now; in the meantime, tell us what
+            Listings are drawn from {mlsSource}. We&rsquo;re finishing our MLS onboarding now; in
+            the meantime, tell us what
             you&rsquo;re looking for and we&rsquo;ll reach out the moment matching homes are
             available.
           </p>

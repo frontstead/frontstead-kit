@@ -8,7 +8,7 @@ import { getPortalListings, getPortalProperty, getPortalReadiness } from '../ser
 import { enqueue as enqueueLeadResponse } from '../services/leadResponseAgentService.js';
 import logger from '../utils/logger.js';
 import { compileCollectionPredicate } from 'search/collectionPredicate';
-import { getPortalConfig } from '@frontstead/portal-config';
+import { getMlsBoardPolicy, getPortalConfig } from '@frontstead/portal-config';
 import { buildPublicListingWhere, isMlsPublicDisplayEnabled } from 'search/propertyVisibility';
 
 const router = Router();
@@ -130,7 +130,7 @@ router.get('/slug/:slug/available', async (req, res, next) => {
 // from "doesn't exist" / "never launched" — it returns a minimal, generic
 // { suspended: true } payload (no agent/brokerage info) rather than 404, so
 // The portal can render a soft-land page instead of a bare not-found.
-async function sendPublicPortal(slug: string, res, next, { includeSlugWhenSuspended = false } = {}) {
+async function sendPublicPortal(slug: string, res, next, { includeSlugWhenSuspended = false, extra = {} as Record<string, unknown> } = {}) {
   try {
     const portal = await prisma.portal.findUnique({
       where: { slug },
@@ -140,7 +140,7 @@ async function sendPublicPortal(slug: string, res, next, { includeSlugWhenSuspen
     if (portal.suspendedAt) return res.json(includeSlugWhenSuspended ? { suspended: true, slug } : { suspended: true });
     if (!portal.isActive) return res.status(404).json({ error: 'Portal not found' });
     const { suspendedAt: _suspendedAt, ...publicPortal } = portal;
-    res.json(publicPortal);
+    res.json({ ...publicPortal, ...extra });
   } catch (err) {
     next(err);
   }
@@ -151,15 +151,19 @@ router.get('/slug/:slug', (req, res, next) => sendPublicPortal(req.params.slug, 
 // GET /current — this deployment's portal: the one whose slug is compiled in
 // from packages/portal-config/src/portal.config.ts. The portal app asks for its
 // slug here, so the config is the only place the slug is set. Same responses
-// as /slug/:slug; a suspended portal also carries its slug.
+// as /slug/:slug; a suspended portal also carries its slug. It also names the
+// MLS boards the config lists, so the portal can attribute them by name.
 router.get('/current', (req, res, next) => {
   let slug: string;
+  let mlsBoards: { id: string; name: string }[];
   try {
-    slug = getPortalConfig().slug;
+    const config = getPortalConfig();
+    slug = config.slug;
+    mlsBoards = config.listings.boardIds.map((id) => ({ id, name: getMlsBoardPolicy(id).displayName }));
   } catch (err) {
     return handlePortalConfigError(err, res, next);
   }
-  return sendPublicPortal(slug, res, next, { includeSlugWhenSuspended: true });
+  return sendPublicPortal(slug, res, next, { includeSlugWhenSuspended: true, extra: { mlsBoards } });
 });
 
 // GET /slug/:slug/readiness — public-safe resolved listing/search readiness.

@@ -18,6 +18,9 @@ export type PortalBrand = {
   brokeragePhone: string | null;
   // Portal.agentEmail, where inquiry alerts go.
   email: string | null;
+  // Display names of the MLS boards the portal's config lists; empty until
+  // one is configured, so pages don't name a board that isn't there.
+  mlsBoards: string[];
 };
 
 export const FALLBACK_BRAND: PortalBrand = {
@@ -25,6 +28,7 @@ export const FALLBACK_BRAND: PortalBrand = {
   brokerageName: "This brokerage",
   brokeragePhone: null,
   email: null,
+  mlsBoards: [],
 };
 
 const TTL_MS = 60_000;
@@ -49,6 +53,9 @@ async function fetchBrand(): Promise<PortalBrand | null> {
       brokerageName: text(body?.brokerageName) ?? name,
       brokeragePhone: text(body?.brokeragePhone),
       email: text(body?.agentEmail),
+      mlsBoards: Array.isArray(body?.mlsBoards)
+        ? body.mlsBoards.map((board) => text((board as { name?: unknown })?.name)).filter((name): name is string => name !== null)
+        : [],
     };
   } catch {
     return null;

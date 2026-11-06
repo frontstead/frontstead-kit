@@ -54,6 +54,24 @@ describe('plain-text-authored emails render as escaped, wrapped HTML (not raw te
     expect(payload.html).not.toContain('<b>');
   });
 
+  it('sendWelcome names the site the account belongs to, Frontstead by default', async () => {
+    await sendWelcome('user@example.com', 'Pat', 'Carolina Example Homes');
+    expect(mockSend.mock.calls[0][0].subject).toBe('Welcome to Carolina Example Homes');
+    expect(mockSend.mock.calls[0][0].text).toContain('Welcome to Carolina Example Homes.');
+    await sendWelcome('user@example.com', 'Pat');
+    expect(mockSend.mock.calls[1][0].subject).toBe('Welcome to Frontstead');
+  });
+
+  it('uses EMAIL_REPLY_TO when set and no default reply-to otherwise', async () => {
+    delete process.env.EMAIL_REPLY_TO;
+    await sendWelcome('user@example.com', 'Pat');
+    expect(mockSend.mock.calls[0][0].replyTo).toBeUndefined();
+    process.env.EMAIL_REPLY_TO = 'help@example.com';
+    await sendWelcome('user@example.com', 'Pat');
+    expect(mockSend.mock.calls[1][0].replyTo).toBe('help@example.com');
+    delete process.env.EMAIL_REPLY_TO;
+  });
+
   it('sendInquiryConfirmation sends wrapped HTML, not raw unescaped text as the html body', async () => {
     await sendInquiryConfirmation('user@example.com', { address: '123 Main St', city: 'Charlotte', state: 'NC' });
 

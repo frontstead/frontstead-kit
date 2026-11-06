@@ -2,6 +2,16 @@
 
 All notable public changes to Frontstead Kit are documented here.
 
+## [0.12.0.15] - 2026-11-05
+
+### Changed
+- A portal visitor's welcome email is in the portal's name ("Welcome to Smith Realty") instead of "Welcome to Frontstead". Agent HQ accounts still get the Frontstead welcome.
+- Emails have no default reply-to. It used to fall back to a Frontstead staff address; now replies go to `EMAIL_FROM` unless `EMAIL_REPLY_TO` is set.
+- The portal footer and About page name the MLS boards in `listings.boardIds` (for example "Canopy MLS") instead of the "Your MLS Board" placeholder, and leave the MLS lines out while no board is configured. `GET /api/portals/current` now returns `mlsBoards: [{ id, name }]`.
+
+### Upgrading
+- If you relied on the old reply-to fallback, set `EMAIL_REPLY_TO`.
+
 ## [0.12.0.14] - 2026-11-05
 
 ### Added

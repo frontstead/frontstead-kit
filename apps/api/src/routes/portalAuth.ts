@@ -35,7 +35,7 @@ const consumerLoginSchema = Joi.object({
 async function resolveActivePortal(slug) {
   return prisma.portal.findUnique({
     where: { slug },
-    select: { id: true, accountId: true, isActive: true },
+    select: { id: true, accountId: true, isActive: true, name: true },
   });
 }
 
@@ -75,7 +75,7 @@ router.post(
         throw err;
       }
 
-      sendWelcome(user.email, user.firstName || 'there').catch((emailErr) => {
+      sendWelcome(user.email, user.firstName || 'there', portal.name).catch((emailErr) => {
         logger.warn('Failed to send welcome email:', emailErr?.message);
       });
 

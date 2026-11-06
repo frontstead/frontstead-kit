@@ -11,6 +11,7 @@ const smith = {
   brokerageName: "Smith Realty LLC",
   brokeragePhone: "(704) 555-0199",
   agentEmail: "leads@smithrealty.com",
+  mlsBoards: [{ id: "CanopyMLS", name: "Canopy MLS" }],
 };
 
 describe("portal brand", () => {
@@ -34,6 +35,7 @@ describe("portal brand", () => {
       brokerageName: "Smith Realty LLC",
       brokeragePhone: "(704) 555-0199",
       email: "leads@smithrealty.com",
+      mlsBoards: ["Canopy MLS"],
     });
     expect(String(fetchMock.mock.calls[0][0])).toMatch(/\/api\/portals\/current$/);
   });
@@ -74,7 +76,7 @@ describe("portal brand", () => {
   });
 
   it("uses the display name when the brokerage name is blank", async () => {
-    fetchMock.mockResolvedValue(jsonResponse(200, { ...smith, brokerageName: " ", brokeragePhone: null, agentEmail: null }));
-    expect(await getPortalBrand(now)).toEqual({ name: "Smith Realty", brokerageName: "Smith Realty", brokeragePhone: null, email: null });
+    fetchMock.mockResolvedValue(jsonResponse(200, { ...smith, brokerageName: " ", brokeragePhone: null, agentEmail: null, mlsBoards: undefined }));
+    expect(await getPortalBrand(now)).toEqual({ name: "Smith Realty", brokerageName: "Smith Realty", brokeragePhone: null, email: null, mlsBoards: [] });
   });
 });
