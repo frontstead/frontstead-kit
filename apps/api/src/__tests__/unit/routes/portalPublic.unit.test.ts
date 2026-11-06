@@ -83,6 +83,7 @@ describe('GET /current', () => {
     expect(mockPrisma.portal.findUnique.mock.calls[0][0].where).toEqual({ slug: getPortalConfig().slug });
     expect(res.body.slug).toBe(getPortalConfig().slug);
     expect(res.body).not.toHaveProperty('suspendedAt');
+    expect(res.body.mlsBoards).toEqual(getPortalConfig().listings.boardIds.map((id) => ({ id, name: expect.any(String) })));
   });
 
   it('returns 404 when the portal is missing or inactive', async () => {

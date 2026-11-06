@@ -47,7 +47,7 @@ function buildApp() {
   return app;
 }
 
-const ACTIVE_PORTAL = { id: 'portal-1', accountId: 'acc-A', isActive: true };
+const ACTIVE_PORTAL = { id: 'portal-1', accountId: 'acc-A', isActive: true, name: 'Jane Smith Homes' };
 
 describe('POST /api/portals/:slug/auth/register', () => {
   beforeEach(() => vi.clearAllMocks());
@@ -91,6 +91,7 @@ describe('POST /api/portals/:slug/auth/register', () => {
         portalId: 'portal-1',
       }),
     });
+    expect(mockSendWelcome).toHaveBeenCalledWith('buyer@example.com', 'Pat', 'Jane Smith Homes');
   });
 
   it('returns 404 when the portal slug is unknown', async () => {

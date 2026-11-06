@@ -9,11 +9,12 @@ const LINKS = [
 
 // Compliance footer. This portal is its own licensed brokerage (single
 // entity), so the attribution is to the brokerage itself plus the MLS IDX
-// disclosure + equal housing. The brokerage name comes from the portal; the MLS
-// board name below is a placeholder — replace it with your own board.
+// disclosure + equal housing. The brokerage and MLS board names come from the
+// portal; the MLS lines appear once a board is configured.
 export async function SiteFooter() {
   const year = new Date().getFullYear();
   const brand = await getPortalBrand();
+  const boards = brand.mlsBoards.join(", ");
   return (
     <footer className="border-t border-border bg-card">
       <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
@@ -21,8 +22,8 @@ export async function SiteFooter() {
           <div className="max-w-md">
             <p className="text-sm font-black tracking-tight text-foreground">{brand.name}</p>
             <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-              {brand.brokerageName} is a licensed real estate brokerage. Listing data is provided by your
-              MLS board and is intended for consumers&rsquo; personal, non-commercial use.
+              {brand.brokerageName} is a licensed real estate brokerage.
+              {boards ? ` Listing data is provided by ${boards} and is intended for consumers’ personal, non-commercial use.` : null}
             </p>
           </div>
           <nav className="flex flex-col gap-2 text-xs text-muted-foreground">
@@ -35,7 +36,7 @@ export async function SiteFooter() {
         </div>
         <div className="mt-8 flex flex-col gap-2 border-t border-border pt-6 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
           <p>© {year} {brand.brokerageName}. All rights reserved.</p>
-          <p className="font-medium">Equal Housing Opportunity · Your MLS Board</p>
+          <p className="font-medium">Equal Housing Opportunity{boards ? ` · ${boards}` : null}</p>
         </div>
       </div>
     </footer>

@@ -33,8 +33,9 @@ function getFromEmail(): string {
   return process.env.EMAIL_FROM ?? 'Frontstead <notifications@frontstead.com>';
 }
 
+// Unset means replies go to the From address.
 function getReplyToEmail(): string | undefined {
-  return process.env.EMAIL_REPLY_TO ?? 'kyle@frontstead.com';
+  return process.env.EMAIL_REPLY_TO || undefined;
 }
 
 function getFrontendUrl(): string {
@@ -97,10 +98,12 @@ export function getInquiryConfirmationText({ propertyAddress, city, state }) {
 An agent will contact you shortly to help with your request.`;
 }
 
-export function getWelcomeText({ userName }) {
+// siteName is whose account this is: Frontstead for Agent HQ accounts, the
+// portal's own name for a portal visitor's account.
+export function getWelcomeText({ userName, siteName = 'Frontstead' }) {
   return `Hi ${userName},
 
-Welcome to Frontstead.
+Welcome to ${siteName}.
 
 You can now save favorites and submit inquiries on available properties.`;
 }
@@ -129,11 +132,11 @@ export async function sendInquiryConfirmation(to, property) {
   });
 }
 
-export async function sendWelcome(to, userName) {
+export async function sendWelcome(to, userName, siteName = 'Frontstead') {
   return sendPlainTextEmail({
     to,
-    subject: 'Welcome to Frontstead',
-    text: getWelcomeText({ userName }),
+    subject: `Welcome to ${siteName}`,
+    text: getWelcomeText({ userName, siteName }),
   });
 }
 
