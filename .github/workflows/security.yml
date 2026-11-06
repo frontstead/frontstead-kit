@@ -27,7 +27,9 @@ jobs:
 
   dependency-review:
     name: Review dependency changes
-    if: github.event_name == 'pull_request'
+    # Dependency review needs GitHub Advanced Security on private repos, so a
+    # private fork of the kit skips it instead of failing every PR.
+    if: github.event_name == 'pull_request' && !github.event.repository.private
     runs-on: ubuntu-latest
     permissions:
       contents: read
