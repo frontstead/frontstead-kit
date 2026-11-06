@@ -23,6 +23,7 @@ export interface EnsurePortalInput {
   name: string;
   brokerageName: string;
   brokeragePhone: string;
+  agentEmail?: string;
   domains: string[];
 }
 
@@ -44,7 +45,7 @@ export interface EnsurePortalTx {
   account: { create(args: { data: { name: string } }): Promise<{ id: string }> };
   portal: {
     create(args: {
-      data: { slug: string; name: string; accountId: string; brokerageName: string; brokeragePhone: string; customDomain: string | null; isActive: boolean };
+      data: { slug: string; name: string; accountId: string; brokerageName: string; brokeragePhone: string; agentEmail: string | null; customDomain: string | null; isActive: boolean };
     }): Promise<unknown>;
   };
 }
@@ -80,6 +81,7 @@ export async function ensurePortal(db: EnsurePortalDb, input: EnsurePortalInput)
           accountId: account.id,
           brokerageName: input.brokerageName,
           brokeragePhone: input.brokeragePhone,
+          agentEmail: input.agentEmail ?? null,
           customDomain,
           isActive: true,
         },
@@ -149,6 +151,7 @@ async function main(): Promise<void> {
       name: config.name,
       brokerageName: config.compliance.brokerageName,
       brokeragePhone: config.compliance.brokeragePhone,
+      agentEmail: config.agentEmail,
       domains: config.domains,
     });
     const { ok, lines } = describeEnsurePortal(result, {

@@ -9,8 +9,8 @@ import { getSessionUser } from "@/lib/session-user-server";
 import { safePath } from "@/lib/safe-path";
 
 export const metadata: Metadata = {
-  title: "Join | ABC Realty",
-  description: "Create an ABC Realty account to save your favorite homes.",
+  title: "Join",
+  description: "Create an account to save your favorite homes.",
 };
 
 export default async function JoinPage({

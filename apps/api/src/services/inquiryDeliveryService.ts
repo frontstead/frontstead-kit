@@ -1,9 +1,11 @@
 import { prisma } from 'db';
-import { sendEmail } from 'email';
+import { sendPlainTextEmail } from 'email';
 import logger from '../utils/logger.js';
 
-type DeliveryPayload = { subject: string; text: string };
-type Sender = (input: { to: string; subject: string; text: string }) => Promise<{ ok?: boolean; skipped?: boolean; id?: string }>;
+// replyTo is the visitor, so replying to the alert answers the lead. Rows
+// queued before it was added have none and use the default reply-to.
+type DeliveryPayload = { subject: string; text: string; replyTo?: string };
+type Sender = (input: { to: string; subject: string; text: string; replyTo?: string }) => Promise<{ ok?: boolean; skipped?: boolean; id?: string }>;
 
 const RETRY_DELAYS_MS = [60_000, 5 * 60_000, 30 * 60_000, 2 * 60 * 60_000];
 
@@ -14,7 +16,8 @@ export async function dispatchInquiryDeliveries(options: {
 } = {}) {
   const now = options.now ?? new Date();
   const staleLock = new Date(now.getTime() - 15 * 60_000);
-  const sender = options.sender ?? sendEmail;
+  // Plain text, escaped into the HTML part: the message is visitor input.
+  const sender = options.sender ?? sendPlainTextEmail;
   const candidates = await prisma.inquiryDelivery.findMany({
     where: {
       OR: [
@@ -47,7 +50,7 @@ export async function dispatchInquiryDeliveries(options: {
     const delivery = await prisma.inquiryDelivery.findUniqueOrThrow({ where: { id: candidate.id } });
     try {
       const payload = delivery.payload as DeliveryPayload;
-      const sent = await sender({ to: delivery.recipient, subject: payload.subject, text: payload.text });
+      const sent = await sender({ to: delivery.recipient, subject: payload.subject, text: payload.text, replyTo: payload.replyTo });
       if (sent.skipped || sent.ok === false) throw new Error('Email provider is not configured; delivery was not sent');
       await prisma.inquiryDelivery.update({
         where: { id: delivery.id },

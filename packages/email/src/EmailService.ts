@@ -23,6 +23,12 @@ function getResend(): Resend | null {
   return cachedClient ?? null;
 }
 
+// True when sends will actually go out. Without a provider, sendEmail logs and
+// skips, so callers that retry (the inquiry outbox) wait instead of failing.
+export function isEmailConfigured(): boolean {
+  return Boolean(process.env.RESEND_API_KEY);
+}
+
 function getFromEmail(): string {
   return process.env.EMAIL_FROM ?? 'Frontstead <notifications@frontstead.com>';
 }

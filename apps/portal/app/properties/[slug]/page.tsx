@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Button } from "@frontstead/ui/button";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { getPortalBrand } from "@/lib/brand";
 import { getPortalProperty, type PortalPropertyDetail } from "@/lib/listings";
 import { getPublicSiteUrl } from "@/lib/site-url";
 
@@ -35,9 +36,10 @@ function descriptionFor(property: PortalPropertyDetail) {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const property = await getPortalProperty(slug);
-  if (!property) return { title: "Property Not Found | ABC Realty" };
+  if (!property) return { title: "Property Not Found" };
 
-  const title = `${property.address} - ${property.city}, ${property.state} | ABC Realty`;
+  const title = `${property.address} - ${property.city}, ${property.state}`;
+  const shareTitle = `${title} | ${(await getPortalBrand()).name}`;
   const description = descriptionFor(property);
   const canonical = new URL(`properties/${property.slug ?? property.id}`, SITE_URL).toString();
   return {
@@ -45,7 +47,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     description,
     alternates: { canonical },
     openGraph: {
-      title,
+      title: shareTitle,
       description,
       url: canonical,
       type: "website",
@@ -53,7 +55,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     },
     twitter: {
       card: "summary_large_image",
-      title,
+      title: shareTitle,
       description,
       images: property.imageUrl ? [property.imageUrl] : [],
     },

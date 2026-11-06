@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { getPortalBrand } from "@/lib/brand";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,11 +18,15 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-export const metadata: Metadata = {
-  title: "ABC Realty | Golf Community Real Estate",
-  description:
-    "Homes in your area's golf communities. ABC Realty, a licensed real estate brokerage.",
-};
+// Every page title ends with the portal's name: pages set just their own part
+// ("Privacy") and the template adds " | <name>".
+export async function generateMetadata(): Promise<Metadata> {
+  const brand = await getPortalBrand();
+  return {
+    title: { default: `${brand.name} | Golf Community Real Estate`, template: `%s | ${brand.name}` },
+    description: `Homes in your area's golf communities. ${brand.brokerageName}, a licensed real estate brokerage.`,
+  };
+}
 
 export default function RootLayout({
   children,

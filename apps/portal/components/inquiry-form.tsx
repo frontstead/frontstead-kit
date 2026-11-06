@@ -19,7 +19,7 @@ export function InquiryForm({ communities, areaSlug, collectionSlug }: { communi
       <div className="rounded-md border border-border bg-card p-6">
         <p className="text-sm font-semibold text-foreground">Thanks — we&rsquo;ll be in touch.</p>
         <p className="mt-1 text-sm text-muted-foreground">
-          An ABC Realty agent will reach out as soon as listings go live in your community.
+          An agent will reach out as soon as listings go live in your community.
         </p>
       </div>
     );

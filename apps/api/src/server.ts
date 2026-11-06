@@ -57,6 +57,7 @@ import emailRoutes from './routes/email.js';
 import ownerLeadsRoutes from './routes/ownerLeads.js';
 import ownerCollectionsRoutes from './routes/ownerCollections.js';
 import { ensureBootstrapAdmin } from './services/bootstrapAdmin.js';
+import { startInquiryDeliveryScheduler } from './services/inquiryDeliveryScheduler.js';
 import { ensureCollections, isTypesenseConfigured } from './search/index.js';
 
 import { authMiddleware, requireRole } from './middleware/auth.js';
@@ -217,6 +218,8 @@ export const startServer = async () => {
   }
 
   await ensureBootstrapAdmin();
+
+  startInquiryDeliveryScheduler();
 
   const port = process.env.API_PORT || 3001;
   app.listen(port, () => {

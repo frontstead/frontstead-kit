@@ -4,16 +4,17 @@ import { SiteFooter } from "@/components/site-footer";
 import { PageHero } from "@/components/page-hero";
 import { InquiryForm } from "@/components/inquiry-form";
 import { getCommunities } from "@/lib/communities";
+import { getPortalBrand } from "@/lib/brand";
 
 export const metadata: Metadata = {
-  title: "Contact | ABC Realty",
-  description:
-    "Tell us what you're looking for and an ABC Realty agent will be in touch.",
+  title: "Contact",
+  description: "Tell us what you're looking for and an agent will be in touch.",
 };
 
 export default async function ContactPage({ searchParams }: { searchParams: Promise<{ area?: string; collection?: string }> }) {
   const attribution = await searchParams;
   const communityNames = getCommunities().map((c) => c.name);
+  const brand = await getPortalBrand();
   return (
     <>
       <SiteHeader />
@@ -28,7 +29,7 @@ export default async function ContactPage({ searchParams }: { searchParams: Prom
             <InquiryForm communities={communityNames} areaSlug={attribution.area} collectionSlug={attribution.collection} />
           </div>
           <p className="mt-6 text-xs text-muted-foreground">
-            ABC Realty is a licensed real estate brokerage.
+            {brand.brokerageName} is a licensed real estate brokerage.
           </p>
         </div>
         <SiteFooter />

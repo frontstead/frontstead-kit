@@ -60,7 +60,8 @@ Taking your own portal to production takes one config file and a deploy. There i
    ```
 
    On later deploys, it says `ready (existing, not changed)`. It only ever creates the portal. After that, edit the name, phone and so on from the owner dashboard, and a redeploy won't overwrite them. It never creates users, passwords or demo data.
-3. **Check it.** The portal's healthcheck is `GET /api/health` on port 3006, and it is healthy only when the API serves your portal, so `docker compose up --wait` fails rather than serving an empty site. Open `<API_URL>/api/portals/slug/<slug>/readiness` to see what's shown and why. When `API_URL` is set in the migrate service, the migrate log prints this URL.
+3. **Get an email for each inquiry (optional).** Set `agentEmail` in `portal.config.ts` before the first deploy (a portal that already exists keeps its own value: set its `agentEmail` in Agent HQ's portal settings or in the database), and set `RESEND_API_KEY` and `EMAIL_FROM` on the API. The API then sends each new inquiry to that address within a minute, with the visitor as the reply-to, and retries failed sends. Without a provider, inquiries are still saved and their alerts wait until one is set. `INQUIRY_DELIVERY_INTERVAL_SECONDS` changes the interval (default 60; `0` turns it off, for example if you trigger `POST /api/cron/inquiry-deliveries` with `CRON_SECRET` yourself).
+4. **Check it.** The portal's healthcheck is `GET /api/health` on port 3006, and it is healthy only when the API serves your portal, so `docker compose up --wait` fails rather than serving an empty site. Open `<API_URL>/api/portals/slug/<slug>/readiness` to see what's shown and why. When `API_URL` is set in the migrate service, the migrate log prints this URL.
 
 ### When something is off
 
@@ -70,5 +71,8 @@ Taking your own portal to production takes one config file and a deploy. There i
 | Migrate log: `Portal x exists but is inactive` | The portal was deactivated | Reactivate it (owner dashboard or `isActive`); the site returns 404 until then |
 | Portal `/api/health` 503: `the API has no active portal…` | Migrate didn't run, or one of the two cases above | Run `docker compose run --rm migrate` and read its last line |
 | Portal `/api/health` 503: `the API is unreachable at …` | The portal can't reach the API | Check `API_INTERNAL_URL` and that the API is healthy |
+| API log: `Inquiry alerts: no email provider` | `RESEND_API_KEY` isn't set on the API | Set it (and `EMAIL_FROM`); queued alerts go out on the next run |
+| Inquiries arrive but no email | The portal has no `agentEmail` | Set it on the portal; alerts are queued only for inquiries made after that |
+| Page titles and footer say `Real Estate` / `This brokerage` | The portal couldn't get its portal from the API | Same fixes as the `/api/health` 503 rows |
 
 Demo data (`db:seed:*`) is for local evaluation only and refuses production. See [DATABASE.md](./DATABASE.md).

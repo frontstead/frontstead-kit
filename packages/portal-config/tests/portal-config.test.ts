@@ -33,6 +33,14 @@ describe('portal config', () => {
     expect(['hidden', 'mock', 'db']).toContain(policy.mode);
     expect(Array.isArray(policy.boardIds)).toBe(true);
   });
+
+  it('accepts an optional agentEmail and rejects one that is not an address', () => {
+    const config = structuredClone(getPortalConfig());
+    config.agentEmail = 'leads@example.com';
+    expect(() => validatePortalConfig(config)).not.toThrow();
+    config.agentEmail = 'leads at example';
+    expect(() => validatePortalConfig(config)).toThrow(/agentEmail/);
+  });
 });
 
 describe('classification config', () => {

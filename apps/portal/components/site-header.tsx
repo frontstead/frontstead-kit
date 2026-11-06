@@ -1,5 +1,6 @@
 import { Button } from "@frontstead/ui/button";
 import { getSessionUser } from "@/lib/session-user-server";
+import { getPortalBrand } from "@/lib/brand";
 import { LogoutButton } from "@/components/logout-button";
 import { MobileNav } from "@/components/mobile-nav";
 
@@ -13,14 +14,14 @@ const navLinkClass =
   "hidden rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground sm:inline-flex";
 
 export async function SiteHeader() {
-  const user = await getSessionUser();
+  const [user, brand] = await Promise.all([getSessionUser(), getPortalBrand()]);
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/75">
       <div className="flex w-full items-center justify-between gap-4 px-3 py-3 sm:px-4 lg:px-6">
-        <a href="/" className="flex shrink-0 items-center" aria-label="ABC Realty home">
+        <a href="/" className="flex shrink-0 items-center" aria-label={`${brand.name} home`}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.svg" alt="ABC Realty" className="h-7 w-auto sm:h-8" />
+          <img src="/logo.svg" alt={brand.name} className="h-7 w-auto sm:h-8" />
         </a>
         <nav className="flex min-w-0 flex-1 items-center justify-end gap-1 sm:gap-2">
           {NAV.map((item) => (

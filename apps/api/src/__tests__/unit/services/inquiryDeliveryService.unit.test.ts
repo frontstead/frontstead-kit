@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const delivery = vi.hoisted(() => ({ findMany: vi.fn(), updateMany: vi.fn(), findUniqueOrThrow: vi.fn(), update: vi.fn() }));
 vi.mock('db', () => ({ prisma: { inquiryDelivery: delivery } }));
-vi.mock('email', () => ({ sendEmail: vi.fn() }));
+vi.mock('email', () => ({ sendPlainTextEmail: vi.fn() }));
 vi.mock('../../../utils/logger.js', () => ({ default: { warn: vi.fn() } }));
 const { dispatchInquiryDeliveries } = await import('../../../services/inquiryDeliveryService.js');
 
@@ -45,5 +45,15 @@ describe('dispatchInquiryDeliveries', () => {
     delivery.findUniqueOrThrow.mockResolvedValue({ id: 'd1', recipient: 'owner@example.com', payload: { subject: 'New lead', text: 'Body' }, attempts: 1, maxAttempts: 2, nextAttemptAt: new Date() });
     expect(await dispatchInquiryDeliveries({ sender })).toMatchObject({ deadLettered: 1 });
     expect(delivery.update).toHaveBeenLastCalledWith(expect.objectContaining({ data: expect.objectContaining({ state: 'DEAD_LETTER', attempts: 2 }) }));
+  });
+
+  it('replies to the visitor and falls back for rows queued without a replyTo', async () => {
+    const sender = vi.fn().mockResolvedValue({ ok: true });
+    delivery.findUniqueOrThrow.mockResolvedValue({ id: 'd1', recipient: 'owner@example.com', payload: { subject: 'New lead', text: 'Body', replyTo: 'visitor@example.com' }, attempts: 0, maxAttempts: 2, nextAttemptAt: new Date() });
+    await dispatchInquiryDeliveries({ sender });
+    expect(sender).toHaveBeenLastCalledWith({ to: 'owner@example.com', subject: 'New lead', text: 'Body', replyTo: 'visitor@example.com' });
+    delivery.findUniqueOrThrow.mockResolvedValue({ id: 'd1', recipient: 'owner@example.com', payload: { subject: 'New lead', text: 'Body' }, attempts: 0, maxAttempts: 2, nextAttemptAt: new Date() });
+    await dispatchInquiryDeliveries({ sender });
+    expect(sender).toHaveBeenLastCalledWith(expect.objectContaining({ replyTo: undefined }));
   });
 });
