@@ -1,11 +1,13 @@
 import { Badge } from "@frontstead/ui/badge";
+import { getPortalBrand } from "@/lib/brand";
 
 const SUB_AREAS = ["Lake Norman", "South Charlotte", "Union County", "Fort Mill SC"] as const;
 
 // Structured first viewport (per DESIGN.md) — a bordered, flat fairway-green band
 // that leads with real structure (wordmark + value prop + the four markets), not a
 // theatrical photo hero.
-export function BrandBand() {
+export async function BrandBand() {
+  const brand = await getPortalBrand();
   return (
     <section className="border-b border-border bg-primary text-primary-foreground">
       <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[1.4fr_1fr] lg:items-end lg:py-20">
@@ -17,7 +19,7 @@ export function BrandBand() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/logo-light.svg"
-              alt="ABC Realty"
+              alt={brand.name}
               className="w-64 max-w-full sm:w-80 lg:w-[26rem]"
             />
           </h1>

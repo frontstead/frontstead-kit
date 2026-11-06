@@ -97,6 +97,9 @@ export interface PortalConfig {
   slug: string;
   name: string;
   domains: string[];
+  // Where new-inquiry alerts go (Portal.agentEmail). Optional: without it,
+  // inquiries are saved but nobody is emailed. Visitors can see it.
+  agentEmail?: string;
   theme: PortalThemeConfig;
   listings: PortalListingPolicy;
   features: PortalFeatureFlags;

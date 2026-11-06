@@ -22,9 +22,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const doc = getCommunity(slug);
-  if (!doc) return { title: "Community not found | ABC Realty" };
+  if (!doc) return { title: "Community not found" };
   return {
-    title: `${doc.frontmatter.name} | ABC Realty`,
+    title: doc.frontmatter.name,
     description: doc.frontmatter.summary,
   };
 }

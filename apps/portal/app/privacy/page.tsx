@@ -5,8 +5,8 @@ import { SiteFooter } from "@/components/site-footer";
 import { PageHero } from "@/components/page-hero";
 
 export const metadata: Metadata = {
-  title: "Privacy | ABC Realty",
-  description: "How ABC Realty handles the information you share.",
+  title: "Privacy",
+  description: "How we handle the information you share.",
 };
 
 export default function PrivacyPage() {
@@ -20,7 +20,7 @@ export default function PrivacyPage() {
             Our full privacy policy is being finalized ahead of launch. In plain terms: the only
             information we collect is what you choose to share through our inquiry form — your name,
             contact details, and what you&rsquo;re looking for in a home. We use it solely to connect
-            you with an ABC Realty agent, and we do not sell your information.
+            you with one of our agents, and we do not sell your information.
           </p>
           <p className="mt-4 leading-relaxed text-muted-foreground">
             Questions about your data in the meantime?{" "}

@@ -37,6 +37,7 @@ describe('createInquiry transaction', () => {
     }));
     expect(tx.inquiry.create).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ source: 'PORTAL_ANONYMOUS', contactId: 'c1' }) }));
     expect(tx.inquiryDelivery.create).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ idempotencyKey: 'owner-inquiry:i1' }) }));
+    expect(tx.inquiryDelivery.create.mock.calls[0][0].data.payload).toMatchObject({ replyTo: 'ada@example.com' });
   });
 
   it('uses the same unique contact upsert under concurrent submissions', async () => {

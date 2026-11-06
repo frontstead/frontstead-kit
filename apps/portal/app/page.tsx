@@ -40,7 +40,7 @@ export default function HomePage() {
             <div className="flex flex-col gap-2">
               <p className="text-xs font-semibold uppercase tracking-widest text-primary">Get on the list</p>
               <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-                Talk to an ABC Realty agent
+                Talk to an agent
               </h2>
               <p className="max-w-md text-sm text-muted-foreground sm:text-base">
                 Listings go live as soon as our MLS access is approved. Tell us what you&rsquo;re

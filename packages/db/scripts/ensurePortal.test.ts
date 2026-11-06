@@ -7,6 +7,7 @@ const input = {
   name: 'Smith Realty',
   brokerageName: 'Smith Realty LLC',
   brokeragePhone: '(704) 555-0199',
+  agentEmail: 'leads@smithrealty.com',
   domains: ['smith-realty.localhost', 'smithrealty.com', 'localhost'],
 };
 
@@ -45,9 +46,17 @@ describe('ensurePortal', () => {
       accountId: 'acct_1',
       brokerageName: 'Smith Realty LLC',
       brokeragePhone: '(704) 555-0199',
+      agentEmail: 'leads@smithrealty.com',
       customDomain: 'smithrealty.com',
       isActive: true,
     }]);
+  });
+
+  it('leaves agentEmail empty when the config has none', async () => {
+    const { db, created } = fakeDb();
+    const { agentEmail: _agentEmail, ...withoutEmail } = input;
+    await ensurePortal(db, withoutEmail);
+    assert.equal(created.portals[0].agentEmail, null);
   });
 
   it('changes nothing when the portal already exists', async () => {

@@ -5,9 +5,9 @@ import { SiteFooter } from "@/components/site-footer";
 import { getCommunities, type SubArea } from "@/lib/communities";
 
 export const metadata: Metadata = {
-  title: "Golf Communities | ABC Realty",
+  title: "Golf Communities",
   description:
-    "Explore golf communities across the region — the neighborhoods, clubs, and courses ABC Realty covers.",
+    "Explore golf communities across the region — the neighborhoods, clubs, and courses we cover.",
 };
 
 const SUB_AREAS: SubArea[] = ["Lake Norman", "South Charlotte", "Union County", "Fort Mill SC"];

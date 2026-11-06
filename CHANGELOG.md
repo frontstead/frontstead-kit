@@ -2,6 +2,23 @@
 
 All notable public changes to Frontstead Kit are documented here.
 
+## [0.12.0.14] - 2026-11-05
+
+### Added
+- **Inquiry alerts go out without an external cron.** The API now sends queued new-inquiry emails itself every minute when an email provider is configured (`RESEND_API_KEY`). Without one, alerts stay queued instead of failing, and go out once a provider is set. `INQUIRY_DELIVERY_INTERVAL_SECONDS` changes the interval, and `0` turns it off for anyone who keeps calling `POST /api/cron/inquiry-deliveries`.
+- `portal.config.ts` takes an optional `agentEmail`, the address new-inquiry alerts go to. `db:migrate` sets it when it creates the portal; an existing portal keeps its own value.
+- Replying to an inquiry alert now answers the visitor: the alert's reply-to is the visitor's email.
+
+### Changed
+- The portal's page titles, header, footer and legal copy use the portal's own name (from `GET /api/portals/current`) instead of the hard-coded "ABC Realty". Pages set only their own part of the title, and the root layout adds ` | <portal name>`. The name is cached for a minute, so an edit to the portal shows up without a redeploy.
+
+### Security
+- Inquiry alerts are sent as escaped plain text. They used to put the visitor's message into the HTML part as is, so a message containing HTML rendered in the owner's inbox.
+
+### Upgrading
+- If your fork replaced "ABC Realty" in page copy, you can drop those edits: set `name` and `compliance.brokerageName` in `portal.config.ts` (or on the existing portal) instead. Expect merge conflicts in the files you edited; take this release's version.
+- To get inquiry alerts, set `RESEND_API_KEY` and `EMAIL_FROM` on the API, and the portal's `agentEmail`.
+
 ## [0.12.0.13] - 2026-11-02
 
 ### Security

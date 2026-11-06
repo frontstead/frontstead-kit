@@ -39,6 +39,9 @@ function validateConfig(config: PortalConfig): void {
   for (const item of config.classification.definitions) classifierExpressionSchema.parse(item.classifier);
   for (const item of config.classification.initialAreas) classifierExpressionSchema.parse(item.definition);
   for (const item of config.classification.initialCollections) collectionPredicateSchema.parse(item.predicate);
+  if (config.agentEmail !== undefined && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(config.agentEmail)) {
+    throw new PortalConfigError(`Portal ${config.slug} agentEmail must be an email address.`);
+  }
   if (!config.compliance.brokerageName || !config.compliance.brokeragePhone) {
     throw new PortalConfigError(`Portal ${config.slug} compliance brokerage fields are required.`);
   }

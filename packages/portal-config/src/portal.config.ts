@@ -8,6 +8,8 @@ export const portalConfig: PortalConfig = {
   slug: 'abc-realty',
   name: 'ABC Realty',
   domains: ['abc-realty.localhost', 'localhost'],
+  // New-inquiry alerts go here once an email provider is set (RESEND_API_KEY).
+  // agentEmail: 'you@example.com',
   theme: {
     preset: 'default',
     primary: '#171717',

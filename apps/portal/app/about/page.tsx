@@ -4,26 +4,27 @@ import { Button } from "@frontstead/ui/button";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { PageHero } from "@/components/page-hero";
+import { getPortalBrand } from "@/lib/brand";
 
 export const metadata: Metadata = {
-  title: "About | ABC Realty",
-  description:
-    "ABC Realty is a licensed real estate brokerage focused on golf-community homes.",
+  title: "About",
+  description: "A licensed real estate brokerage focused on golf-community homes.",
 };
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const brand = await getPortalBrand();
   return (
     <>
       <SiteHeader />
       <main className="bg-background">
         <PageHero
           eyebrow="About"
-          title="ABC Realty"
+          title={brand.name}
           subtitle="Golf-community real estate in your market."
         />
         <article className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
           <p className="leading-relaxed text-muted-foreground">
-            ABC Realty is a licensed real estate brokerage focused on one thing: helping
+            {brand.brokerageName} is a licensed real estate brokerage focused on one thing: helping
             buyers find the right home in a golf community. We cover the metro&rsquo;s distinct
             pockets of golf living — waterfront communities, in-town country clubs, and estate-lot
             neighborhoods across the region.

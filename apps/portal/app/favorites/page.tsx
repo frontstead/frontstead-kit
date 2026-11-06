@@ -9,7 +9,7 @@ import { getSessionUser } from "@/lib/session-user-server";
 import { getToken } from "@/lib/auth";
 
 export const metadata: Metadata = {
-  title: "Favorites | ABC Realty",
+  title: "Favorites",
   description: "Homes you've saved.",
 };
 

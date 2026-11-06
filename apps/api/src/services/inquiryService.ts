@@ -127,7 +127,7 @@ export async function createInquiry(input: CreateInquiryInput) {
           kind: 'OWNER_INQUIRY_NOTIFICATION',
           recipient: normalizeEmail(portal.agentEmail),
           idempotencyKey: `owner-inquiry:${inquiry.id}`,
-          payload: { subject: `New inquiry on ${portal.name}`, text },
+          payload: { subject: `New inquiry on ${portal.name}`, text, replyTo: visitorEmail },
         },
       });
     }

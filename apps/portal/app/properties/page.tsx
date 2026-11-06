@@ -9,7 +9,7 @@ import { PropertyCard } from "@/components/property-card";
 import { getPortalListings } from "@/lib/listings";
 
 export const metadata: Metadata = {
-  title: "Properties | ABC Realty",
+  title: "Properties",
   description: "Search active listings in our coverage area.",
 };
 
