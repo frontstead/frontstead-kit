@@ -1,0 +1,92 @@
+#!/usr/bin/env bash
+# Pre-commit: block staged files larger than MAX_TOKENS (tokens = bytes / 4).
+#
+# Only staged content is measured (the blob in the index, not the working tree).
+# Files agents do not author are skipped: lockfiles, generated code, migrations,
+# binaries, and anything marked `linguist-generated` in .gitattributes.
+#
+# Install (once per clone):
+#   ln -sf ../../.githooks/pre-commit "$(git rev-parse --git-path hooks)/pre-commit"
+set -euo pipefail
+
+MAX_TOKENS=5000
+MAX_BYTES=$((MAX_TOKENS * 4))
+
+is_exempt() {
+  case "$1" in
+    # Lockfiles
+    package-lock.json | */package-lock.json | npm-shrinkwrap.json | */npm-shrinkwrap.json | \
+    yarn.lock | */yarn.lock | pnpm-lock.yaml | */pnpm-lock.yaml | bun.lock | */bun.lock | \
+    *.lock | .terraform.lock.hcl | */.terraform.lock.hcl) return 0 ;;
+    # Generated code and build output
+    *.generated.* | *.gen.* | generated/* | */generated/* | \
+    */prisma/migrations/*/migration.sql | next-env.d.ts | */next-env.d.ts | \
+    *.min.js | *.min.css | *.map | *.snap | __snapshots__/* | */__snapshots__/* | \
+    *.tfstate | *.tfstate.* | *.tfplan | \
+    dist/* | */dist/* | build/* | */build/* | out/* | */out/* | .next/* | */.next/* | \
+    coverage/* | */coverage/*) return 0 ;;
+    # Text-encoded design assets
+    *.svg) return 0 ;;
+  esac
+  case "$(git check-attr --cached linguist-generated -- "$1")" in
+    *": set" | *": true") return 0 ;;
+  esac
+  return 1
+}
+
+offenders=""
+# numstat prints "-<TAB>-" for binary files; -z keeps odd paths intact.
+while IFS=$'\t' read -r -d '' added _deleted path; do
+  [ "$added" = "-" ] && continue
+  is_exempt "$path" && continue
+  bytes=$(git cat-file -s ":$path")
+  if [ "$bytes" -gt "$MAX_BYTES" ]; then
+    offenders="${offenders}  ${path}  (~$(((bytes + 3) / 4)) tokens, ${bytes} bytes)"$'\n'
+  fi
+done < <(git diff --cached --numstat -z --no-renames --diff-filter=ACM)
+
+[ -z "$offenders" ] && exit 0
+
+cat >&2 <<EOF
+pre-commit: staged files exceed the ${MAX_TOKENS}-token limit (tokens = bytes / 4, max ${MAX_BYTES} bytes):
+
+${offenders}
+Split each file above until every resulting file is under ${MAX_BYTES} bytes, then
+stage the new files and commit again. Do not bypass this check (--no-verify), minify,
+strip comments, or mark the file as generated to get under the limit.
+
+How to split:
+  1. Find the seams. List the file's top-level units (components, hooks, route
+     handlers, helpers, types, constants, describe blocks, markdown H2 sections).
+     Group units that change together; each group becomes one new file.
+  2. Move, do not rewrite. Cut each group verbatim into a sibling file with a
+     descriptive name. No behavior, signature, or formatting changes in the same commit.
+  3. Keep the original import path working. Leave the original file as a thin
+     entry point that imports from (or re-exports) the new files, so no caller
+     has to change. If callers must change, update every one of them.
+  4. Verify. Run the repo's typecheck and tests; confirm each new file is under
+     ${MAX_BYTES} bytes with: wc -c <file>
+
+By file type:
+  - React page/component (.tsx): extract subcomponents into components/<name>.tsx
+    next to the page, state/data logic into use-<name>.ts hooks, and shared types
+    into types.ts. Next.js page.tsx/layout.tsx must keep their filename and
+    default export; move everything else out.
+  - Express route file (routes/<resource>.ts): turn it into routes/<resource>/
+    with one file per handler group (e.g. list.ts, detail.ts, mutations.ts) plus
+    an index.ts that builds the Router from them; move validation schemas to
+    schemas.ts.
+  - Utility/service module (.ts): one file per cohesive group of exported
+    functions, plus an index.ts that re-exports them.
+  - Tests: split by describe block into <subject>.<aspect>.test.ts files; move
+    shared fixtures and setup into a test helper module.
+  - Seed/fixture scripts: move data arrays into data/*.ts modules and keep the
+    script as the orchestration that imports them.
+  - Prisma schema: use multi-file schema (prisma/schema/*.prisma, one file per
+    domain) instead of one schema.prisma.
+  - Terraform: split by concern (network.tf, iam.tf, storage.tf, outputs.tf);
+    Terraform loads every .tf in the directory, so no wiring is needed.
+  - Markdown: split at H2 boundaries into a directory of focused documents and
+    keep the original file as a short index that links to each part.
+EOF
+exit 1
